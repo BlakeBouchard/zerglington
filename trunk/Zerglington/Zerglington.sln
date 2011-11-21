@@ -1,7 +1,6 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zerglington", "Zerglington\Zerglington.vcproj", "{998B8426-2E67-4530-8F5F-ADF3ED9EAE61}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zerglington", "..\ExampleAIModule\ExampleAIModule.vcproj", "{2E63AE74-758A-4607-9DE4-D28E814A6E13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +8,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{998B8426-2E67-4530-8F5F-ADF3ED9EAE61}.Debug|Win32.ActiveCfg = Debug|Win32
-		{998B8426-2E67-4530-8F5F-ADF3ED9EAE61}.Debug|Win32.Build.0 = Debug|Win32
-		{998B8426-2E67-4530-8F5F-ADF3ED9EAE61}.Release|Win32.ActiveCfg = Release|Win32
-		{998B8426-2E67-4530-8F5F-ADF3ED9EAE61}.Release|Win32.Build.0 = Release|Win32
+		{2E63AE74-758A-4607-9DE4-D28E814A6E13}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2E63AE74-758A-4607-9DE4-D28E814A6E13}.Debug|Win32.Build.0 = Debug|Win32
+		{2E63AE74-758A-4607-9DE4-D28E814A6E13}.Release|Win32.ActiveCfg = Release|Win32
+		{2E63AE74-758A-4607-9DE4-D28E814A6E13}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
