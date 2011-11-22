@@ -36,22 +36,22 @@ void ExampleAIModule::onStart(){
 			Broodwar->self()->getRace().getName().c_str(),
 			Broodwar->enemy()->getRace().getName().c_str());
 
-		int droneCount = 0;
-		//send the first four drones to the nearest mineral field
+		//Iterate through all units at game start
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+			//Send all drones to the nearest mineral patch
 			if ((*i)->getType().isWorker()){
-				Unit* closestMineral=NULL;
+				Unit* closestMineral = findClosestMineral(*i);
+				/*Unit* closestMineral=NULL;
 				for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++){
 					if (closestMineral==NULL || (*i)->getDistance(*m)<(*i)->getDistance(closestMineral))
 						closestMineral=*m;
-				}
+				}*/
 				if (closestMineral!=NULL){
 					(*i)->rightClick(closestMineral);
-					droneCount++;
 				}
 			}
 			else if ((*i)->getType().isResourceDepot()){
-				//we are Zerg, so we need to select a larva and morph it into a drone
+				//Select all larvae and set them to morph into drones.
 				std::set<Unit*> myLarva=(*i)->getLarva();
 				if (myLarva.size()>0){
 					Unit* larva=*myLarva.begin();
@@ -190,14 +190,19 @@ void ExampleAIModule::onUnitDestroy(BWAPI::Unit* unit){
 }
 
 void ExampleAIModule::onUnitMorph(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay())
+	if (!Broodwar->isReplay()){
 		Broodwar->sendText("A %s [%x] has been morphed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
-	else
-	{
+
+		//If unit was morphed to a drone:
+		if(unit->getType().getName() == "Zerg_Drone"){
+			//Send it to the closest mineral patch
+		}
+
+
+	}else{
 		/*if we are in a replay, then we will print out the build order
 		(just of the buildings, not the units).*/
-		if (unit->getType().isBuilding() && unit->getPlayer()->isNeutral()==false)
-		{
+		if (unit->getType().isBuilding() && unit->getPlayer()->isNeutral()==false){
 			int seconds=Broodwar->getFrameCount()/24;
 			int minutes=seconds/60;
 			seconds%=60;

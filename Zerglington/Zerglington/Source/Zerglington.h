@@ -37,4 +37,7 @@ public:
   void showForces();
   bool show_bullets;
   bool show_visibility_data;
+
+  //Functions implemented in Utils.cpp
+  BWAPI::Unit* findClosestMineral(BWAPI::Unit* unit);
 };
