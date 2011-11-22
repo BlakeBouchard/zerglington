@@ -3,6 +3,7 @@ using namespace BWAPI;
 
 bool analyzed;
 bool analysis_just_finished;
+bool hasSpawningPool;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
 
@@ -19,6 +20,7 @@ void ExampleAIModule::onStart(){
 	BWTA::readMap();
 	analyzed=false;
 	analysis_just_finished=false;
+	hasSpawningPool = false;
 
 	show_bullets=false;
 	show_visibility_data=false;
@@ -41,11 +43,6 @@ void ExampleAIModule::onStart(){
 			//Send all drones to the nearest mineral patch
 			if ((*i)->getType().isWorker()){
 				Unit* closestMineral = findClosestMineral(*i);
-				/*Unit* closestMineral=NULL;
-				for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++){
-					if (closestMineral==NULL || (*i)->getDistance(*m)<(*i)->getDistance(closestMineral))
-						closestMineral=*m;
-				}*/
 				if (closestMineral!=NULL){
 					(*i)->rightClick(closestMineral);
 				}
@@ -58,6 +55,8 @@ void ExampleAIModule::onStart(){
 					larva->morph(UnitTypes::Zerg_Drone);
 				}
 			}
+			else if(strcmp((*i)->getType().getName().c_str(), "Zerg Spawning Pool") == 0)
+				hasSpawningPool = true;
 		}
 	}
 }
@@ -80,28 +79,43 @@ void ExampleAIModule::onFrame(){
 
 	drawStats();
 	if (analyzed && Broodwar->getFrameCount()%30==0){
-		//order one of our workers to guard our chokepoint.
-		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-			if ((*i)->getType().isWorker()){
-				//get the chokepoints linked to our home region
-				std::set<BWTA::Chokepoint*> chokepoints= home->getChokepoints();
-				double min_length=10000;
-				BWTA::Chokepoint* choke=NULL;
 
-				//iterate through all chokepoints and look for the one with the smallest gap (least width)
-				for(std::set<BWTA::Chokepoint*>::iterator c=chokepoints.begin();c!=chokepoints.end();c++){
-					double length=(*c)->getWidth();
-					if (length<min_length || choke==NULL){
-						min_length=length;
-						choke=*c;
+		//Morph a spawning pool as soon as possible
+		if(Broodwar->self()->minerals() >= UnitTypes::Zerg_Spawning_Pool.mineralPrice()
+			&& hasSpawningPool == false){
+				for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+					//Send a drone which is not carrying minerals to the nearest free patch
+					if ((*i)->getType().isWorker() &&
+						(!(*i)->isGatheringMinerals() | !(*i)->isCarryingMinerals())){
+							Broodwar->sendText("Gonna make a spawning pool!");
+
+							break;
 					}
 				}
-
-				//order the worker to move to the center of the gap
-				(*i)->rightClick(choke->getCenter());
-				break;
-			}
 		}
+
+		/*//order one of our workers to guard our chokepoint.
+		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+		if ((*i)->getType().isWorker()){
+		//get the chokepoints linked to our home region
+		std::set<BWTA::Chokepoint*> chokepoints= home->getChokepoints();
+		double min_length=10000;
+		BWTA::Chokepoint* choke=NULL;
+
+		//iterate through all chokepoints and look for the one with the smallest gap (least width)
+		for(std::set<BWTA::Chokepoint*>::iterator c=chokepoints.begin();c!=chokepoints.end();c++){
+		double length=(*c)->getWidth();
+		if (length<min_length || choke==NULL){
+		min_length=length;
+		choke=*c;
+		}
+		}
+
+		//order the worker to move to the center of the gap
+		(*i)->rightClick(choke->getCenter());
+		break;
+		}
+		}*/
 	}
 	if (analyzed)
 		drawTerrainData();
@@ -148,23 +162,23 @@ void ExampleAIModule::onNukeDetect(BWAPI::Position target){
 }
 
 void ExampleAIModule::onUnitDiscover(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+		//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void ExampleAIModule::onUnitEvade(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+		//Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void ExampleAIModule::onUnitShow(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+		//Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void ExampleAIModule::onUnitHide(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+		//Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void ExampleAIModule::onUnitCreate(BWAPI::Unit* unit){
@@ -194,8 +208,21 @@ void ExampleAIModule::onUnitMorph(BWAPI::Unit* unit){
 		Broodwar->sendText("A %s [%x] has been morphed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 
 		//If unit was morphed to a drone:
-		if(unit->getType().getName() == "Zerg_Drone"){
+		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
 			//Send it to the closest mineral patch
+			Unit* closestMineral = findClosestMineral(unit);
+			if(closestMineral != NULL)
+				unit->rightClick(closestMineral);
+
+			Broodwar->sendText("ClosestMineral is %s (%d,%d)",
+				closestMineral->getType(),
+				closestMineral->getPosition().x(), closestMineral->getPosition().y());
+
+			Broodwar->sendText("Go mine some minerals");
+		}
+		//Else if the unit was morphed to a spawning pool
+		else if(strcmp(unit->getType().getName().c_str(), "Zerg Spawning Pool") == 0){
+			hasSpawningPool = true;		
 		}
 
 
