@@ -3,6 +3,7 @@
 
 using namespace BWAPI;
 
+/** Given a unit i, return a pointer to the mineral patch it is closest to*/ 
 Unit* ExampleAIModule::findClosestMineral(Unit *i){
 	Unit* closestMineral=NULL;
 	for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++){
