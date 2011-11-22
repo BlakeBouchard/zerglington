@@ -8,7 +8,7 @@ BWTA::Region* enemy_base;
 
 void ExampleAIModule::onStart()
 {
-  Broodwar->sendText("HELLO WORLD RAAAA DID I MESS EVERYTHING UP *BLAKE EDIT*");
+  Broodwar->sendText("HELLO WORLD RAAAA DID I MESS EVERYTHING UP *BLAKE EDIT* *TERI EDIT*");
   Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
   // Enable some cheat flags
   Broodwar->enableFlag(Flag::UserInput);
