@@ -180,7 +180,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Scouter.cpp"
+				RelativePath=".\Source\Scouter.cpp"
 				>
 			</File>
 			<File
@@ -198,7 +198,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Scouter.h"
+				RelativePath=".\Source\Scouter.h"
 				>
 			</File>
 			<File
