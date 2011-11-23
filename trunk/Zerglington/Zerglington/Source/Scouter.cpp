@@ -3,15 +3,17 @@
 using namespace BWAPI;
 using namespace std;
 
-vector<Unit*> overlords;
-vector<Unit*> zerglings;
+vector<Unit*> scouts;
 set<BWTA::BaseLocation*> startLocations;
-
+set<BWTA::BaseLocation*> scouted;
+list<BWTA::BaseLocation*> unscouted;
+map<BWTA::BaseLocation*, Unit* > enroute;
 BWTA::BaseLocation* enemyBase;
 
-Scouter::Scouter()
+Scouter::Scouter(void)
 {
 	startLocations = BWTA::getStartLocations();
+	unscouted.assign(startLocations.begin(), startLocations.end());
 	enemyBase = NULL;
 }
 
@@ -21,29 +23,33 @@ Scouter::~Scouter(void)
 
 void Scouter::addOverlord(Unit* overlord)
 {
-	overlords.push_back(overlord);
+	scouts.push_back(overlord);
 }
 
 void Scouter::addZergling(Unit* zergling)
 {
-	zerglings.push_back(zergling);
+	scouts.push_back(zergling);
+}
+
+BWTA::BaseLocation* findNearestUnscouted(Unit* unit)
+{
+	list<BWTA::BaseLocation*>::iterator i = unscouted.begin();
+	BWTA::BaseLocation* closest = (*i);
+	Position unitPosition = unit->getPosition();
+	for (++i; i != unscouted.end(); i++)
+	{
+		if ((*i)->getPosition().getDistance(unitPosition) < closest->getPosition().getDistance(unitPosition))
+		{
+			closest = (*i);
+		}
+	}
+
+	return closest;
 }
 
 void Scouter::foundBase(BWTA::BaseLocation* base)
 {
 	enemyBase = base;
-}
-
-void Scouter::foundBase(BWTA::Region* region)
-{
-	for (set<BWTA::BaseLocation*>::iterator i = startLocations.begin(); i != startLocations.end(); i++)
-	{
-		if ((*i)->getRegion() == region)
-		{
-			enemyBase = (*i);
-			break;
-		}
-	}
 }
 
 bool Scouter::foundEnemyBase()
@@ -66,7 +72,7 @@ void Scouter::foundUnit(Unit* unit)
 	}
 }
 
-BWTA::Region* Scouter::getEnemyBase()
+BWTA::Region* Scouter::getEnemyBase(void)
 {
 	if (foundEnemyBase())
 		return enemyBase->getRegion();
@@ -76,5 +82,17 @@ BWTA::Region* Scouter::getEnemyBase()
 
 void Scouter::updateScouts(void)
 {
-
+	if (!unscouted.empty())
+	{
+		for (vector<Unit*>::iterator i = scouts.begin(); i != scouts.end(); i++)
+		{
+			if ((*i)->isIdle())
+			{
+				BWTA::BaseLocation* nearest = findNearestUnscouted((*i));
+				(*i)->move(nearest->getPosition());
+				unscouted.remove(nearest);
+				enroute.insert(pair<BWTA::BaseLocation*, Unit*>(nearest, (*i)));
+			}
+		}
+	}
 }

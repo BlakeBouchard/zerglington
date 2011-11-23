@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
+#include <list>
 #include <set>
 #include <vector>
 
@@ -12,14 +13,13 @@
 class Scouter
 {
 public:
-	Scouter();
+	Scouter(void);
 	~Scouter(void);
 
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
 	void foundBase(BWTA::BaseLocation*);
-	void foundBase(BWTA::Region*);
-	bool foundEnemyBase();
+	bool foundEnemyBase(void);
 	void foundUnit(BWAPI::Unit*);
 	BWTA::Region* getEnemyBase();
 	void updateScouts(void);
