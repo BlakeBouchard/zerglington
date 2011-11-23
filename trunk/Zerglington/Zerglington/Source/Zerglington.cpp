@@ -176,7 +176,7 @@ void Zerglington::onNukeDetect(BWAPI::Position target){
 }
 
 void Zerglington::onUnitDiscover(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
 		scouter.foundUnit(unit); // Scouter will decide what to do
 	//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
