@@ -1,6 +1,8 @@
 #include "Zerglington.h"
+#include "Scouter.h"
 using namespace BWAPI;
 
+Scouter scouter;
 bool analyzed;
 bool analysis_just_finished;
 bool hasSpawningPool;
@@ -54,6 +56,9 @@ void Zerglington::onStart(){
 					Unit* larva=*myLarva.begin();
 					larva->morph(UnitTypes::Zerg_Drone);
 				}
+			} 
+			else if ((*i)->getType().isFlyer()){
+				scouter.addOverlord((*i));
 			}
 			else if(strcmp((*i)->getType().getName().c_str(), "Zerg Spawning Pool") == 0)
 				hasSpawningPool = true;
@@ -95,6 +100,12 @@ void Zerglington::onFrame(){
 							break;
 					}
 				}
+		}
+		
+		// Update Scouts
+		if (enemy_base == NULL)
+		{
+			enemy_base = scouter.updateScouts();
 		}
 
 		/*//order one of our workers to guard our chokepoint.
@@ -166,6 +177,7 @@ void Zerglington::onNukeDetect(BWAPI::Position target){
 
 void Zerglington::onUnitDiscover(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+		scouter.foundUnit(unit); // Scouter will decide what to do
 	//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
