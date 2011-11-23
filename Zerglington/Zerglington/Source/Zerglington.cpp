@@ -103,10 +103,13 @@ void Zerglington::onFrame(){
 		}
 		
 		// Update Scouts
-		if (enemy_base == NULL)
+		scouter.updateScouts(); 
+		if (enemy_base == NULL && scouter.foundEnemyBase())
 		{
-			enemy_base = scouter.updateScouts();
+			enemy_base = scouter.getEnemyBase();
+			Broodwar->sendText("Found enemy base");
 		}
+
 
 		/*//order one of our workers to guard our chokepoint.
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
@@ -199,8 +202,24 @@ void Zerglington::onUnitHide(BWAPI::Unit* unit){
 void Zerglington::onUnitCreate(BWAPI::Unit* unit){
 	if (Broodwar->getFrameCount()>1){
 		if (!Broodwar->isReplay())
+		{
+			if (!scouter.foundEnemyBase())
+			{
+				if (unit->getType().isFlyer())
+				{
+					// Unit is Overlord, pass to Scouter
+					scouter.addOverlord(unit);
+				}
+				else if (strcmp(unit->getType().getName().c_str(), "Zerg Zergling") == 0)
+				{
+					// Enemy base not yet found, pass zergling to scouter
+					scouter.addZergling(unit);
+				}
+			}
 			Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
-		else{
+		}
+		else
+		{
 			/*if we are in a replay, then we will print out the build order
 			(just of the buildings, not the units).*/
 			if (unit->getType().isBuilding() && unit->getPlayer()->isNeutral()==false){
@@ -260,7 +279,7 @@ DWORD WINAPI AnalyzeThread(){
 	}
 	//enemy start location only available if Complete Map Information is enabled.
 	if (BWTA::getStartLocation(BWAPI::Broodwar->enemy())!=NULL){
-		enemy_base = BWTA::getStartLocation(BWAPI::Broodwar->enemy())->getRegion();
+		scouter.foundBase(BWTA::getStartLocation(BWAPI::Broodwar->enemy())->getRegion());
 	}
 	analyzed   = true;
 	analysis_just_finished = true;

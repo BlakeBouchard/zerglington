@@ -4,7 +4,10 @@
 #include <set>
 #include <vector>
 
-// VEGETA. VEGETA. VEGETA. VEGETA.
+// VEGETA. 
+// VEGETA.
+// VEGETA. 
+// VEGETA.
 
 class Scouter
 {
@@ -14,9 +17,10 @@ public:
 
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
+	void foundBase(BWTA::BaseLocation*);
+	void foundBase(BWTA::Region*);
+	bool foundEnemyBase();
 	void foundUnit(BWAPI::Unit*);
-	BWTA::Region* updateScouts(void);
-
-private:
-	
+	BWTA::Region* getEnemyBase();
+	void updateScouts(void);
 };
