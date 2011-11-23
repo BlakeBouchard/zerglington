@@ -280,7 +280,7 @@ DWORD WINAPI AnalyzeThread(){
 	}
 	//enemy start location only available if Complete Map Information is enabled.
 	if (BWTA::getStartLocation(BWAPI::Broodwar->enemy())!=NULL){
-		scouter.foundBase(BWTA::getStartLocation(BWAPI::Broodwar->enemy())->getRegion());
+		scouter.foundBase(BWTA::getStartLocation(BWAPI::Broodwar->enemy()));
 	}
 	analyzed   = true;
 	analysis_just_finished = true;
