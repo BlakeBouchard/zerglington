@@ -7,6 +7,7 @@ bool analysis_just_finished;
 bool hasSpawningPool;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
+Unit *minz;
 
 void Zerglington::onStart(){
 	Broodwar->sendText("Zerglington:");
@@ -44,6 +45,7 @@ void Zerglington::onStart(){
 			//Send all drones to the nearest mineral patch
 			if ((*i)->getType().isWorker()){
 				Unit* closestMineral = findClosestMineral(*i);
+				minz = closestMineral;
 				if (closestMineral!=NULL){
 					(*i)->rightClick(closestMineral);
 				}
@@ -164,22 +166,22 @@ void Zerglington::onNukeDetect(BWAPI::Position target){
 
 void Zerglington::onUnitDiscover(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
-		//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitEvade(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
-		//Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitShow(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
-		//Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitHide(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
-		//Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitCreate(BWAPI::Unit* unit){
@@ -212,17 +214,9 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
 			//Send it to the closest mineral patch
 			Unit* closestMineral = findClosestMineral(unit);
-			if(closestMineral != NULL)
-				unit->rightClick(closestMineral);
-
-			Broodwar->sendText("ClosestMineral is %s (%d,%d)",
-				closestMineral->getType(),
-				closestMineral->getPosition().x(), closestMineral->getPosition().y());
-
-			Broodwar->sendText("Go mine some minerals");
-		}
-		//Else if the unit was morphed to a spawning pool
-		else if(strcmp(unit->getType().getName().c_str(), "Zerg Spawning Pool") == 0){
+			unit->rightClick(closestMineral);
+			//Else if the unit was morphed to a spawning pool
+		}else if(strcmp(unit->getType().getName().c_str(), "Zerg Spawning Pool") == 0){
 			hasSpawningPool = true;		
 		}
 
@@ -272,12 +266,11 @@ void Zerglington::drawStats(){
 		if (unitTypeCounts.find((*i)->getType())==unitTypeCounts.end()){
 			unitTypeCounts.insert(std::make_pair((*i)->getType(),0));
 		}
-		unitTypeCounts.find((*i)->getType())->second++;
-	}
-	int line=1;
-	for(std::map<UnitType,int>::iterator i=unitTypeCounts.begin();i!=unitTypeCounts.end();i++){
-		Broodwar->drawTextScreen(5,16*line,"- %d %ss",(*i).second, (*i).first.getName().c_str());
-		line++;
+		int line=1;
+		for(std::map<UnitType,int>::iterator i=unitTypeCounts.begin();i!=unitTypeCounts.end();i++){
+			Broodwar->drawTextScreen(5,16*line,"- %d %ss",(*i).second, (*i).first.getName().c_str());
+			line++;
+		}
 	}
 }
 
@@ -291,10 +284,6 @@ void Zerglington::drawBullets(){
 			Broodwar->drawLineMap(p.x(),p.y(),p.x()+(int)velocityX,p.y()+(int)velocityY,Colors::Green);
 			Broodwar->drawTextMap(p.x(),p.y(),"\x07%s",(*i)->getType().getName().c_str());
 		}
-		else{
-			Broodwar->drawLineMap(p.x(),p.y(),p.x()+(int)velocityX,p.y()+(int)velocityY,Colors::Red);
-			Broodwar->drawTextMap(p.x(),p.y(),"\x06%s",(*i)->getType().getName().c_str());
-		}
 	}
 }
 
@@ -305,10 +294,8 @@ void Zerglington::drawVisibilityData(){
 				if (Broodwar->isVisible(x,y))
 					Broodwar->drawDotMap(x*32+16,y*32+16,Colors::Green);
 				else
-					Broodwar->drawDotMap(x*32+16,y*32+16,Colors::Blue);
+					Broodwar->drawDotMap(x*32+16,y*32+16,Colors::Red);
 			}
-			else
-				Broodwar->drawDotMap(x*32+16,y*32+16,Colors::Red);
 		}
 	}
 }
