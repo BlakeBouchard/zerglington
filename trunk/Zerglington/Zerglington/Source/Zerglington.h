@@ -38,6 +38,11 @@ public:
   bool show_bullets;
   bool show_visibility_data;
 
-  //Functions implemented in Utils.cpp
+  /* Functions implemented in Utils.cpp */
+
+  //Finds the closest mineral patch to a given unit
   BWAPI::Unit* findClosestMineral(BWAPI::Unit* unit);
+
+  //Sets all drones that are currently not mining to mine at the nearest mineral patch
+  void dronesMine();
 };
