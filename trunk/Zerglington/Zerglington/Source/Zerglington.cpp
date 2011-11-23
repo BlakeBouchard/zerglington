@@ -203,19 +203,6 @@ void Zerglington::onUnitCreate(BWAPI::Unit* unit){
 	if (Broodwar->getFrameCount()>1){
 		if (!Broodwar->isReplay())
 		{
-			if (!scouter.foundEnemyBase())
-			{
-				if (unit->getType().isFlyer())
-				{
-					// Unit is Overlord, pass to Scouter
-					scouter.addOverlord(unit);
-				}
-				else if (strcmp(unit->getType().getName().c_str(), "Zerg Zergling") == 0)
-				{
-					// Enemy base not yet found, pass zergling to scouter
-					scouter.addZergling(unit);
-				}
-			}
 			Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 		}
 		else
@@ -238,7 +225,8 @@ void Zerglington::onUnitDestroy(BWAPI::Unit* unit){
 }
 
 void Zerglington::onUnitMorph(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay()){
+	if (!Broodwar->isReplay())
+	{
 		Broodwar->sendText("A %s [%x] has been morphed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 
 		//If unit was morphed to a drone:
@@ -248,6 +236,19 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 			hasSpawningPool = true;		
 		}
 
+		if (!scouter.foundEnemyBase())
+		{
+			if (unit->getType().isFlyer())
+			{
+				// Unit is Overlord, pass to Scouter
+				scouter.addOverlord(unit);
+			}
+			else if (strcmp(unit->getType().getName().c_str(), "Zerg Zergling") == 0)
+			{
+				// Enemy base not yet found, pass zergling to scouter
+				scouter.addZergling(unit);
+			}
+		}
 
 	}else{
 		/*if we are in a replay, then we will print out the build order
