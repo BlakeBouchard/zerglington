@@ -12,3 +12,18 @@ Unit* Zerglington::findClosestMineral(Unit *i){
 	}
 	return closestMineral;
 }
+
+//Sets all drones that are currently not mining to mine at the nearest mineral patch
+void Zerglington::dronesMine(){
+	//Iterate through all units
+	for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+		//Send all idle workers to the nearest mineral patch
+		if ((*i)->getType().isWorker() 
+			&& !(*i)->isGatheringMinerals() && !(*i)->isGatheringGas()){
+			Unit* closestMineral = findClosestMineral(*i);
+			if (closestMineral!=NULL){
+				(*i)->rightClick(closestMineral);
+			}
+		}
+	}
+}
