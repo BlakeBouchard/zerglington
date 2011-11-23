@@ -1,4 +1,5 @@
 #include "Zerglington.h"
+#include "Scouter.h"
 using namespace BWAPI;
 
 bool analyzed;
@@ -7,7 +8,7 @@ bool hasSpawningPool;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
 
-void ExampleAIModule::onStart(){
+void Zerglington::onStart(){
 	Broodwar->sendText("Zerglington:");
 	Broodwar->sendText("Blake Bouchard and Teri Drummond");
 	//Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
@@ -61,13 +62,13 @@ void ExampleAIModule::onStart(){
 	}
 }
 
-void ExampleAIModule::onEnd(bool isWinner){
+void Zerglington::onEnd(bool isWinner){
 	if (isWinner){
 		//log win to file
 	}
 }
 
-void ExampleAIModule::onFrame(){
+void Zerglington::onFrame(){
 	if (show_visibility_data)
 		drawVisibilityData();
 
@@ -126,7 +127,7 @@ void ExampleAIModule::onFrame(){
 	}
 }
 
-void ExampleAIModule::onSendText(std::string text){
+void Zerglington::onSendText(std::string text){
 	if (text=="/show bullets"){
 		show_bullets = !show_bullets;
 	} else if (text=="/show players"){
@@ -146,42 +147,42 @@ void ExampleAIModule::onSendText(std::string text){
 	}
 }
 
-void ExampleAIModule::onReceiveText(BWAPI::Player* player, std::string text){
+void Zerglington::onReceiveText(BWAPI::Player* player, std::string text){
 	Broodwar->printf("%s said '%s'", player->getName().c_str(), text.c_str());
 }
 
-void ExampleAIModule::onPlayerLeft(BWAPI::Player* player){
+void Zerglington::onPlayerLeft(BWAPI::Player* player){
 	Broodwar->sendText("%s left the game.",player->getName().c_str());
 }
 
-void ExampleAIModule::onNukeDetect(BWAPI::Position target){
+void Zerglington::onNukeDetect(BWAPI::Position target){
 	if (target!=Positions::Unknown)
 		Broodwar->printf("Nuclear Launch Detected at (%d,%d)",target.x(),target.y());
 	else
 		Broodwar->printf("Nuclear Launch Detected");
 }
 
-void ExampleAIModule::onUnitDiscover(BWAPI::Unit* unit){
+void Zerglington::onUnitDiscover(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 		//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
-void ExampleAIModule::onUnitEvade(BWAPI::Unit* unit){
+void Zerglington::onUnitEvade(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 		//Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
-void ExampleAIModule::onUnitShow(BWAPI::Unit* unit){
+void Zerglington::onUnitShow(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 		//Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
-void ExampleAIModule::onUnitHide(BWAPI::Unit* unit){
+void Zerglington::onUnitHide(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 		//Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
-void ExampleAIModule::onUnitCreate(BWAPI::Unit* unit){
+void Zerglington::onUnitCreate(BWAPI::Unit* unit){
 	if (Broodwar->getFrameCount()>1){
 		if (!Broodwar->isReplay())
 			Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
@@ -198,12 +199,12 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit* unit){
 	}
 }
 
-void ExampleAIModule::onUnitDestroy(BWAPI::Unit* unit){
+void Zerglington::onUnitDestroy(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
 		Broodwar->sendText("A %s [%x] has been destroyed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
-void ExampleAIModule::onUnitMorph(BWAPI::Unit* unit){
+void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay()){
 		Broodwar->sendText("A %s [%x] has been morphed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 
@@ -238,12 +239,12 @@ void ExampleAIModule::onUnitMorph(BWAPI::Unit* unit){
 	}
 }
 
-void ExampleAIModule::onUnitRenegade(BWAPI::Unit* unit){
+void Zerglington::onUnitRenegade(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay())
 		Broodwar->sendText("A %s [%x] is now owned by %s",unit->getType().getName().c_str(),unit,unit->getPlayer()->getName().c_str());
 }
 
-void ExampleAIModule::onSaveGame(std::string gameName){
+void Zerglington::onSaveGame(std::string gameName){
 	Broodwar->printf("The game was saved to \"%s\".", gameName.c_str());
 }
 
@@ -263,7 +264,7 @@ DWORD WINAPI AnalyzeThread(){
 	return 0;
 }
 
-void ExampleAIModule::drawStats(){
+void Zerglington::drawStats(){
 	std::set<Unit*> myUnits = Broodwar->self()->getUnits();
 	Broodwar->drawTextScreen(5,0,"I have %d units:",myUnits.size());
 	std::map<UnitType, int> unitTypeCounts;
@@ -280,7 +281,7 @@ void ExampleAIModule::drawStats(){
 	}
 }
 
-void ExampleAIModule::drawBullets(){
+void Zerglington::drawBullets(){
 	std::set<Bullet*> bullets = Broodwar->getBullets();
 	for(std::set<Bullet*>::iterator i=bullets.begin();i!=bullets.end();i++){
 		Position p=(*i)->getPosition();
@@ -297,7 +298,7 @@ void ExampleAIModule::drawBullets(){
 	}
 }
 
-void ExampleAIModule::drawVisibilityData(){
+void Zerglington::drawVisibilityData(){
 	for(int x=0;x<Broodwar->mapWidth();x++){
 		for(int y=0;y<Broodwar->mapHeight();y++){
 			if (Broodwar->isExplored(x,y)){
@@ -312,7 +313,7 @@ void ExampleAIModule::drawVisibilityData(){
 	}
 }
 
-void ExampleAIModule::drawTerrainData(){
+void Zerglington::drawTerrainData(){
 	//we will iterate through all the base locations, and draw their outlines.
 	for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++){
 		TilePosition p=(*i)->getTilePosition();
@@ -359,14 +360,14 @@ void ExampleAIModule::drawTerrainData(){
 	}
 }
 
-void ExampleAIModule::showPlayers(){
+void Zerglington::showPlayers(){
 	std::set<Player*> players=Broodwar->getPlayers();
 	for(std::set<Player*>::iterator i=players.begin();i!=players.end();i++){
 		Broodwar->printf("Player [%d]: %s is in force: %s",(*i)->getID(),(*i)->getName().c_str(), (*i)->getForce()->getName().c_str());
 	}
 }
 
-void ExampleAIModule::showForces(){
+void Zerglington::showForces(){
 	std::set<Force*> forces=Broodwar->getForces();
 	for(std::set<Force*>::iterator i=forces.begin();i!=forces.end();i++){
 		std::set<Player*> players=(*i)->getPlayers();
