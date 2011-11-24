@@ -1,7 +1,6 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
-#include <list>
 #include <set>
 #include <vector>
 
