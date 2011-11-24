@@ -5,15 +5,14 @@ using namespace std;
 
 vector<Unit*> scouts;
 set<BWTA::BaseLocation*> startLocations;
-set<BWTA::BaseLocation*> scouted;
-list<BWTA::BaseLocation*> unscouted;
+set<BWTA::BaseLocation*> unscouted;
 map<BWTA::BaseLocation*, Unit* > enroute;
 BWTA::BaseLocation* enemyBase;
 
 Scouter::Scouter(void)
 {
 	startLocations = BWTA::getStartLocations();
-	unscouted.assign(startLocations.begin(), startLocations.end());
+	unscouted = startLocations;
 	enemyBase = NULL;
 }
 
@@ -24,18 +23,21 @@ Scouter::~Scouter(void)
 void Scouter::addOverlord(Unit* overlord)
 {
 	scouts.push_back(overlord);
+	Broodwar->sendText("Added Overlord to scouts");
 }
 
 void Scouter::addZergling(Unit* zergling)
 {
 	scouts.push_back(zergling);
+	Broodwar->sendText("Added Zergling to scouts");
 }
 
 BWTA::BaseLocation* findNearestUnscouted(Unit* unit)
 {
-	list<BWTA::BaseLocation*>::iterator i = unscouted.begin();
+	set<BWTA::BaseLocation*>::iterator i = unscouted.begin();
 	BWTA::BaseLocation* closest = (*i);
 	Position unitPosition = unit->getPosition();
+	
 	for (++i; i != unscouted.end(); i++)
 	{
 		if ((*i)->getPosition().getDistance(unitPosition) < closest->getPosition().getDistance(unitPosition))
@@ -90,9 +92,24 @@ void Scouter::updateScouts(void)
 			{
 				BWTA::BaseLocation* nearest = findNearestUnscouted((*i));
 				(*i)->move(nearest->getPosition());
-				unscouted.remove(nearest);
+				unscouted.erase(nearest);
 				enroute.insert(pair<BWTA::BaseLocation*, Unit*>(nearest, (*i)));
+				Broodwar->sendText("Scout moving to position");
 			}
 		}
+	}
+	if (!enroute.empty())
+	{
+		for (map<BWTA::BaseLocation*, Unit*>::iterator i = enroute.begin(); i != enroute.end(); i++)
+		{
+			if (i->first->getPosition() == i->second->getPosition())
+			{
+				enroute.erase(i);
+			}
+		}
+	}
+	if (!foundEnemyBase() && enroute.empty() && unscouted.empty())
+	{
+		Broodwar->sendText("WARNING: No more BaseLocations to scout, no bases found");
 	}
 }
