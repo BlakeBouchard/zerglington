@@ -97,10 +97,12 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\Scouter.cpp" />
     <ClCompile Include="Source\Utils.cpp" />
+    <ClCompile Include="Source\Worker.cpp" />
     <ClCompile Include="Source\Zerglington.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Scouter.h" />
+    <ClInclude Include="Source\Worker.h" />
     <ClInclude Include="Source\Zerglington.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
