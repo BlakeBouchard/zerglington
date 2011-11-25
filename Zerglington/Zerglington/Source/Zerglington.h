@@ -1,5 +1,6 @@
 #pragma once
 #include <BWAPI.h>
+#include "Worker.h"
 
 #include <BWTA.h>
 #include <windows.h>
@@ -40,9 +41,21 @@ public:
 
   /* Functions implemented in Utils.cpp */
 
+  //Counts the number of spawning pools
+  int spawningPoolCount();
+
   //Finds the closest mineral patch to a given unit
   BWAPI::Unit* findClosestMineral(BWAPI::Unit* unit);
 
-  //Sets all drones that are currently not mining to mine at the nearest mineral patch
-  void dronesMine();
+  //Sends a unit to mine at the nearest mineral patch
+  void sendToMine(BWAPI::Unit* unit);
+
+  //Sends a unit to morph
+  void sendToMorph(BWAPI::Unit* unit);
+
+  //Determines the most needed job of a worker given the current conditions
+  int mostNeededJob();
+
+  //Finds a place to build (morph) a spawning pool
+  BWAPI::TilePosition getBuildLoc();
 };
