@@ -44,7 +44,7 @@ public:
 	bool show_visibility_data;
 
 	std::queue<int> morphQ; //Queue of what needs to be morphed. Must correspond to enum morph
-	std::map<int, Worker*> Workers; //Map organizing all drone units, keyed by their ID
+	std::map<int, Worker*> workers; //Map organizing all drone units, keyed by their ID
 	BWAPI::TilePosition posBuild; //The tile position where we will build our spawning pool
 	bool hasSpawningPool;
 	bool isMorphingSpawningPool;

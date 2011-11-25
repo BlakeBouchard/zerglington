@@ -49,7 +49,7 @@ void Zerglington::onStart(){
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
 			//Set all workers to mine
 			if ((*i)->getType().isWorker()){
-				Workers.insert(std::pair<int, Worker*>((*i)->getID(), new Worker(IDLE, *i)));
+				workers.insert(std::pair<int, Worker*>((*i)->getID(), new Worker(IDLE, *i)));
 				droneCount++;
 			}
 			else if ((*i)->getType().isFlyer()){
@@ -78,7 +78,7 @@ void Zerglington::onFrame(){
 	drawStats();
 
 	//Mange Workers
-	for(std::map<int, Worker*>::const_iterator i = Workers.begin(); i != Workers.end(); i++){
+	for(std::map<int, Worker*>::const_iterator i = workers.begin(); i != workers.end(); i++){
 		//First determine the role the unit should have (morphing takes priority, don't change that job)
 		if((*i).second->getJob() != MORPH)
 			(*i).second->setJob(mostNeededJob());
@@ -215,7 +215,7 @@ void Zerglington::onUnitDestroy(BWAPI::Unit* unit){
 		Broodwar->sendText("A %s [%x] has been destroyed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 		//If unit was our drone, remove it from our set
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0 && unit->getPlayer() == Broodwar->self()){
-			Workers.erase(unit->getID());
+			workers.erase(unit->getID());
 			droneCount--;
 		}
 	}
@@ -228,7 +228,7 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 
 		//If unit was morphed to a drone:
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
-			Workers.insert(std::pair<int, Worker*>(unit->getID(), new Worker(IDLE, unit))); //Add it to container
+			workers.insert(std::pair<int, Worker*>(unit->getID(), new Worker(IDLE, unit))); //Add it to container
 			droneCount++;
 		}else if(strcmp(unit->getType().getName().c_str(), "Zerg Spawning Pool") == 0)
 			hasSpawningPool = true;
