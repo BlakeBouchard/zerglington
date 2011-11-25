@@ -27,12 +27,18 @@
     <ClCompile Include="Source\Zerglington.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Worker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Scouter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Zerglington.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
