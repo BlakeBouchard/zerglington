@@ -1,15 +1,18 @@
 #include "Zerglington.h"
 #include "Scouter.h"
+#include <map>
 using namespace BWAPI;
 
 Scouter scouter;
 bool analyzed;
 bool analysis_just_finished;
-bool hasSpawningPool;
 BWTA::Region* home;
 BWTA::Region* enemy_base;
 
+std::map<int, Worker*> Workers;
+
 void Zerglington::onStart(){
+	Broodwar->setFrameSkip();
 	Broodwar->sendText("Zerglington:");
 	Broodwar->sendText("Blake Bouchard and Teri Drummond");
 	//Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
@@ -23,7 +26,6 @@ void Zerglington::onStart(){
 	analyzed=false;
 	analysis_just_finished=false;
 	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
-	hasSpawningPool = false;
 
 	show_bullets=false;
 	show_visibility_data=false;
@@ -43,12 +45,9 @@ void Zerglington::onStart(){
 
 		//Iterate through all units at game start
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-			//Send all drones to the nearest mineral patch
+			//Set all workers to mine
 			if ((*i)->getType().isWorker()){
-				Unit* closestMineral = findClosestMineral(*i);
-				if (closestMineral!=NULL){
-					(*i)->rightClick(closestMineral);
-				}
+				Workers.insert(std::pair<int, Worker*>((*i)->getID(), new Worker(IDLE, *i)));
 			}
 			else if ((*i)->getType().isResourceDepot()){
 				//Select all larvae and set them to morph into drones.
@@ -61,8 +60,6 @@ void Zerglington::onStart(){
 			else if ((*i)->getType().isFlyer()){
 				scouter.addOverlord((*i));
 			}
-			else if(strcmp((*i)->getType().getName().c_str(), "Zerg Spawning Pool") == 0)
-				hasSpawningPool = true;
 		}
 	}
 }
@@ -85,23 +82,21 @@ void Zerglington::onFrame(){
 
 	drawStats();
 
-	dronesMine();
+	//Mange Workers
+	for(std::map<int, Worker*>::const_iterator i = Workers.begin(); i != Workers.end(); i++){
+		//First determine the role the unit should have
+		(*i).second->setJob(mostNeededJob());
+		
+		//Perform the unit's job
+		if((*i).second->getJob() == MINERALS){					//Send to mineral patch
+			sendToMine((*i).second->getUnit());
+		}
+		else if((*i).second->getJob() == MORPH){					//Send to morph into queued unit type
+			sendToMorph((*i).second->getUnit());
+		}
+	}
 
 	if (analyzed && Broodwar->getFrameCount()%30==0){
-
-		//Morph a spawning pool as soon as possible
-		if(Broodwar->self()->minerals() >= UnitTypes::Zerg_Spawning_Pool.mineralPrice()
-			&& hasSpawningPool == false){
-				for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-					//Send a drone which is not carrying minerals to the nearest free patch
-					if ((*i)->getType().isWorker() &&
-						(!(*i)->isGatheringMinerals() | !(*i)->isCarryingMinerals())){
-							Broodwar->sendText("Gonna make a spawning pool!");
-
-							break;
-					}
-				}
-		}
 		
 		// Update Scouts
 		scouter.updateScouts(); 
@@ -110,7 +105,6 @@ void Zerglington::onFrame(){
 			enemy_base = scouter.getEnemyBase();
 			Broodwar->sendText("Found enemy base");
 		}
-
 
 		/*//order one of our workers to guard our chokepoint.
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
@@ -221,8 +215,13 @@ void Zerglington::onUnitCreate(BWAPI::Unit* unit){
 }
 
 void Zerglington::onUnitDestroy(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1){
 		Broodwar->sendText("A %s [%x] has been destroyed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+		//If unit was our drone, remove it from our set
+		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0 && unit->getPlayer() == Broodwar->self()){
+			Workers.erase(unit->getID());
+		}
+	}
 }
 
 void Zerglington::onUnitMorph(BWAPI::Unit* unit){
@@ -232,11 +231,8 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 
 		//If unit was morphed to a drone:
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
-			//Else if the unit was morphed to a spawning pool
-		}else if(strcmp(unit->getType().getName().c_str(), "Zerg Spawning Pool") == 0){
-			hasSpawningPool = true;		
+			Workers.insert(std::pair<int, Worker*>(unit->getID(), new Worker(IDLE, unit))); //Add it to container
 		}
-
 		if (!scouter.foundEnemyBase())
 		{
 			if (unit->getType().isFlyer())
@@ -250,7 +246,6 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 				scouter.addZergling(unit);
 			}
 		}
-
 	}else{
 		/*if we are in a replay, then we will print out the build order
 		(just of the buildings, not the units).*/
