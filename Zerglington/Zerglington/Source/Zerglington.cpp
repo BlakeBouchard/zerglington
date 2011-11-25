@@ -22,6 +22,7 @@ void Zerglington::onStart(){
 	BWTA::readMap();
 	analyzed=false;
 	analysis_just_finished=false;
+	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 	hasSpawningPool = false;
 
 	show_bullets=false;
@@ -282,8 +283,10 @@ DWORD WINAPI AnalyzeThread(){
 	if (BWTA::getStartLocation(BWAPI::Broodwar->enemy())!=NULL){
 		scouter.foundBase(BWTA::getStartLocation(BWAPI::Broodwar->enemy()));
 	}
+	scouter.initialize();
 	analyzed   = true;
 	analysis_just_finished = true;
+	Broodwar->sendText("Terrain analysis complete");
 	return 0;
 }
 

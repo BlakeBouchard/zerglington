@@ -15,6 +15,7 @@ public:
 	Scouter(void);
 	~Scouter(void);
 
+	void initialize(void);
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
 	void foundBase(BWTA::BaseLocation*);
