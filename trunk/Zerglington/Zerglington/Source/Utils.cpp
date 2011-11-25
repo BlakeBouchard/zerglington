@@ -1,19 +1,13 @@
 #include "Zerglington.h"
 #include <BWAPI.h>
-#include <queue>
-
+bool once;
 using namespace BWAPI;
-
-std::queue<std::string> morphQ; //Queue of what needs to be morphed. Must be a name of a unit type.
-
-//Count the number of spawning pools
-int Zerglington::spawningPoolCount(){
-	int count = 0;
-	for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-		if(strcmp((*i)->getType().getName().c_str(), "Zerg Spawning Pool") == 0)
-			count++;
-	}
-	return count;
+//Initialize the build order for a six-pool rush
+void Zerglington::initBuildOrder(){
+	morphQ.push(DRONE);
+	morphQ.push(DRONE);
+	morphQ.push(POOL);
+	morphQ.push(DRONE);
 }
 
 //Given a unit i, return a pointer to the mineral patch it is closest to
@@ -39,32 +33,53 @@ void Zerglington::sendToMine(BWAPI::Unit *unit){
 	}
 }
 
-//Sends a drone to morph
+//Sends a drone to morph into a spawning pool
 void Zerglington::sendToMorph(BWAPI::Unit *unit){
-	//Only give command if drone is not yet morphing
-	if(unit->isMorphing())
-		return;
-	else if(morphQ.size() != 0){
-		std::string type = morphQ.front();
-		TilePosition p = getBuildLoc();
-		Broodwar->sendText("Should build pool at (%d,%d)", p.x(), p.y());
-		unit->rightClick(Position(p.x()*32,p.y()*32));
-		//Broodwar->sendText("Gonna morph a %s at (%d,%d)", type, p.x(), p.y());
-		//unit->rightClick(Position(p.x(),p.y()));
-		//if(unit->morph(UnitTypes::getUnitType(type)) == true)
-		//	morphQ.pop();
+	int x = unit->getTilePosition().x();
+	int y = unit->getTilePosition().y();
+	//Proceed with the morph if the unit is in the desired place and isn't yet morphing
+	if( x <= posBuild.x()+1 && x >= posBuild.x()-1 && y <= posBuild.y()+1 && y >= posBuild.y()-1){
+		if(!once){
+			if(unit->morph(UnitTypes::Zerg_Spawning_Pool) == false)
+				Broodwar->sendText("WHAT IS GOIN ONNN");
+			else{
+				once = true;
+				Broodwar->sendText("Should be morphing now");
+				morphQ.pop(); //Remove this task from the queue
+			}
+		}
+	}else{
+		//Otherwise, get the unit to move to where it should be
+		unit->rightClick(Position(posBuild.x()*32,posBuild.y()*32));
 	}
 }
 
 //Determines the most needed job for a drone given the current situation
 int Zerglington::mostNeededJob(){
-	//Morph a spawning pool as soon as possible
-	if(Broodwar->self()->minerals() >= UnitTypes::Zerg_Spawning_Pool.mineralPrice()
-		&& spawningPoolCount() < 1){
-			morphQ.push("Zerg Spawning Pool");
+	//Check whether we have the resources to morph the next unit in the morph queue, and do it if possible
+	if(morphQ.size() != 0){ //First see if there's anything left to morph
+		if(morphQ.front() == DRONE && Broodwar->canMake(NULL, UnitTypes::Zerg_Drone)){
+			//Get the hatchery, then get the larva
+			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+				if ((*i)->getType().isResourceDepot()){
+					//Select a larvae and morph into drone.
+					std::set<Unit*> myLarva=(*i)->getLarva();
+					if (myLarva.size()>0){
+						Unit* larva=*myLarva.begin();
+						larva->morph(UnitTypes::Zerg_Drone);
+						morphQ.pop(); //Remove this task from the queue
+					}
+				}
+			}
+		}
+		else if(morphQ.front() == POOL && Broodwar->canMake(NULL, UnitTypes::Zerg_Spawning_Pool) && isMorphingSpawningPool == false){
+			isMorphingSpawningPool = true;	
 			return MORPH;
+		}
 	}
-	else return MINERALS;
+	
+	//No drones need to morph, so get them to mine
+	return MINERALS;
 }
 
 //Finds a place to build (morph) a spawning pool
@@ -72,6 +87,7 @@ int Zerglington::mostNeededJob(){
 //Take the location of the closest mineral patch to the hatchery, and build the pool
 //directly on the opposite side of the hatchery.
 TilePosition Zerglington::getBuildLoc(){
+	once = false;
 	//Get position of mineral patch closest to the hatchery
 	TilePosition posHatchery;
 	TilePosition posMinerals;
