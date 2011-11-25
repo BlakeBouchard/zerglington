@@ -3,6 +3,7 @@
 using namespace BWAPI;
 using namespace std;
 
+bool initialized;
 vector<Unit*> scouts;
 set<BWTA::BaseLocation*> startLocations;
 set<BWTA::BaseLocation*> unscouted;
@@ -11,13 +12,20 @@ BWTA::BaseLocation* enemyBase;
 
 Scouter::Scouter(void)
 {
-	startLocations = BWTA::getStartLocations();
-	unscouted = startLocations;
+	initialized = false;
 	enemyBase = NULL;
 }
 
 Scouter::~Scouter(void)
 {
+}
+
+void Scouter::initialize(void)
+{
+	startLocations = BWTA::getStartLocations();
+	unscouted = startLocations;
+	Broodwar->printf("Found %d start locations", startLocations.size());
+	initialized = true;
 }
 
 void Scouter::addOverlord(Unit* overlord)
@@ -52,6 +60,7 @@ BWTA::BaseLocation* findNearestUnscouted(Unit* unit)
 void Scouter::foundBase(BWTA::BaseLocation* base)
 {
 	enemyBase = base;
+	Broodwar->sendText("Found enemy base");
 }
 
 bool Scouter::foundEnemyBase()
@@ -84,6 +93,9 @@ BWTA::Region* Scouter::getEnemyBase(void)
 
 void Scouter::updateScouts(void)
 {
+	if (!initialized)
+		return;
+
 	if (!unscouted.empty())
 	{
 		for (vector<Unit*>::iterator i = scouts.begin(); i != scouts.end(); i++)
