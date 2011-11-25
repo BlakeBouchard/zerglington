@@ -1,7 +1,7 @@
 #include "Zerglington.h"
 #include <BWAPI.h>
-bool once;
 using namespace BWAPI;
+
 //Initialize the build order for a six-pool rush
 void Zerglington::initBuildOrder(){
 	morphQ.push(DRONE);
@@ -35,22 +35,10 @@ void Zerglington::sendToMine(BWAPI::Unit *unit){
 
 //Sends a drone to morph into a spawning pool
 void Zerglington::sendToMorph(BWAPI::Unit *unit){
-	int x = unit->getTilePosition().x();
-	int y = unit->getTilePosition().y();
-	//Proceed with the morph if the unit is in the desired place and isn't yet morphing
-	if( x <= posBuild.x()+1 && x >= posBuild.x()-1 && y <= posBuild.y()+1 && y >= posBuild.y()-1){
-		if(!once){
-			if(unit->morph(UnitTypes::Zerg_Spawning_Pool) == false)
-				Broodwar->sendText("WHAT IS GOIN ONNN");
-			else{
-				once = true;
-				Broodwar->sendText("Should be morphing now");
-				morphQ.pop(); //Remove this task from the queue
-			}
-		}
-	}else{
-		//Otherwise, get the unit to move to where it should be
-		unit->rightClick(Position(posBuild.x()*32,posBuild.y()*32));
+	unit->build(posBuild, UnitTypes::Zerg_Spawning_Pool);
+	if(unit->isMorphing()){
+		morphQ.pop(); //Remove this task from the queue
+		workers.erase(unit->getID()); //Remove this worker from the queue so we don't mess with him
 	}
 }
 
@@ -87,7 +75,6 @@ int Zerglington::mostNeededJob(){
 //Take the location of the closest mineral patch to the hatchery, and build the pool
 //directly on the opposite side of the hatchery.
 TilePosition Zerglington::getBuildLoc(){
-	once = false;
 	//Get position of mineral patch closest to the hatchery
 	TilePosition posHatchery;
 	TilePosition posMinerals;
