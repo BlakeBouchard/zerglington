@@ -22,8 +22,10 @@ Scouter::~Scouter(void)
 
 void Scouter::initialize(void)
 {
+	homeBase = Broodwar->self()->getStartLocation();
 	startLocations = Broodwar->getStartLocations();
 	unscouted = startLocations;
+	unscouted.erase(homeBase);
 	BWTA::readMap();
 	Broodwar->printf("Analyzing map... this may take a minute");
 	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
@@ -79,22 +81,22 @@ TilePosition Scouter::findNearestUnscouted(Unit* unit)
 	return closest;
 }
 
-TilePosition Scouter::findNearestStart(Unit* unit)
-{
-	TileSet::iterator i = startLocations.begin();
-	TilePosition closest = (*i);
-	TilePosition unitPosition = unit->getTilePosition();
-	
-	for (++i; i != startLocations.end(); i++)
-	{
-		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
-		{
-			closest = (*i);
-		}
-	}
-
-	return closest;
-}
+//TilePosition Scouter::findNearestStart(Unit* unit)
+//{
+//	TileSet::iterator i = startLocations.begin();
+//	TilePosition closest = (*i);
+//	TilePosition unitPosition = unit->getTilePosition();
+//	
+//	for (++i; i != startLocations.end(); i++)
+//	{
+//		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
+//		{
+//			closest = (*i);
+//		}
+//	}
+//
+//	return closest;
+//}
 
 void Scouter::foundBase(TilePosition basePosition)
 {
@@ -105,7 +107,8 @@ void Scouter::foundBase(TilePosition basePosition)
 
 void Scouter::foundUnit(Unit* unit)
 {
-	if (unit->getType().isBuilding())
+	UnitType unitType = unit->getType();
+	if (!foundEnemyBase && unitType.isBuilding() && !unitType.isNeutral())
 	{
 		foundBase(unit->getTilePosition());
 	}
@@ -126,7 +129,7 @@ void Scouter::updateScouts(void)
 		{
 			if (scout->getType().isFlyer())
 			{
-				TilePosition nearest = findFurthestUnscouted(scout);
+				TilePosition nearest = findNearestUnscouted(scout);
 				unscouted.insert(i->second);
 				scout->move(Position(nearest));
 				i->second = nearest;
@@ -139,7 +142,7 @@ void Scouter::updateScouts(void)
 				i->second = furthest;
 			}
 		}
-		else if (scout->getPosition() == destination)
+		else if (Broodwar->isVisible(i->second))
 		{
 			i->second = findNearestUnscouted(scout);
 			scout->move(Position(i->second));
