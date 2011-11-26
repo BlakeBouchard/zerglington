@@ -99,11 +99,13 @@
     <ClCompile Include="Source\Utils.cpp" />
     <ClCompile Include="Source\Worker.cpp" />
     <ClCompile Include="Source\Zerglington.cpp" />
+    <ClCompile Include="Striker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Scouter.h" />
     <ClInclude Include="Source\Worker.h" />
     <ClInclude Include="Source\Zerglington.h" />
+    <ClInclude Include="Striker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -36,7 +36,7 @@ public:
 
 	BWAPI::TilePosition findFurthestUnscouted(BWAPI::Unit*);
 	BWAPI::TilePosition findNearestUnscouted(BWAPI::Unit*);
-	//BWAPI::TilePosition findNearestStart(BWAPI::Unit*);
+	BWAPI::TilePosition findNearestStart(BWAPI::Unit*);
 
 	BWAPI::TilePosition homeBase;
 
