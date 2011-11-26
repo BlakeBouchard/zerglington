@@ -1,19 +1,12 @@
 #pragma once
 #include <BWAPI.h>
+#include "Scouter.h"
 #include "Worker.h"
 
-//#include <BWTA.h>
-#include <windows.h>
 #include <queue>
 #include <map>
 
 enum morph{DRONE, POOL};
-
-//extern bool analyzed;
-//extern bool analysis_just_finished;
-//extern BWTA::Region* home;
-//extern BWTA::Region* enemy_base;
-//DWORD WINAPI AnalyzeThread();
 
 class Zerglington : public BWAPI::AIModule
 {
@@ -37,7 +30,6 @@ public:
 	void drawStats(); //not part of BWAPI::AIModule
 	void drawBullets();
 	void drawVisibilityData();
-	//void drawTerrainData();
 	void showPlayers();
 	void showForces();
 	bool show_bullets;
