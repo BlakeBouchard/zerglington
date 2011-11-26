@@ -1,13 +1,7 @@
 #include "Zerglington.h"
-#include "Scouter.h"
 using namespace BWAPI;
 
 Scouter scouter;
-
-//bool analyzed;
-//bool analysis_just_finished;
-//BWTA::Region* home;
-//BWTA::Region* enemy_base;
 
 void Zerglington::onStart(){
 	Broodwar->sendText("Zerglington:");
@@ -18,14 +12,7 @@ void Zerglington::onStart(){
 	// Uncomment to enable complete map information
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
 
-	//read map information into BWTA so terrain analysis can be done in another thread
-	/*BWTA::readMap();
-	analyzed=false;
-	analysis_just_finished=false;
-	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
-
-	show_bullets=false;
-	show_visibility_data=false;*/
+	scouter.initialize();
 
 	if (Broodwar->isReplay()){
 		Broodwar->printf("The following players are in this replay:");
@@ -126,13 +113,8 @@ void Zerglington::onFrame(){
 		}
 		}*/
 	}
-	/*if (analyzed)
-		drawTerrainData();
-
-	if (analysis_just_finished){
-		Broodwar->printf("Finished analyzing map.");
-		analysis_just_finished=false;
-	}*/
+	if (analyzed)
+		scouter.drawTerrainData();
 }
 
 void Zerglington::onSendText(std::string text){
@@ -144,13 +126,9 @@ void Zerglington::onSendText(std::string text){
 		showForces();
 	} else if (text=="/show visibility"){
 		show_visibility_data=!show_visibility_data;
-	}
-	/* else if (text=="/analyze"){
-		if (analyzed == false){
-			Broodwar->printf("Analyzing map... this may take a minute");
-			CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
-		}
-	}*/ 
+	} else if (text=="/analyze"){
+		scouter.initialize();
+}
 	else{
 		Broodwar->printf("You typed '%s'!",text.c_str());
 		Broodwar->sendText("%s",text.c_str());
@@ -271,24 +249,6 @@ void Zerglington::onSaveGame(std::string gameName){
 	Broodwar->printf("The game was saved to \"%s\".", gameName.c_str());
 }
 
-//DWORD WINAPI AnalyzeThread(){
-//	BWTA::analyze();
-//
-//	//self start location only available if the map has base locations
-//	if (BWTA::getStartLocation(BWAPI::Broodwar->self())!=NULL){
-//		home       = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion();
-//	}
-//	//enemy start location only available if Complete Map Information is enabled.
-//	if (BWTA::getStartLocation(BWAPI::Broodwar->enemy())!=NULL){
-//		scouter.foundBase(BWTA::getStartLocation(BWAPI::Broodwar->enemy()));
-//	}
-//	scouter.initialize();
-//	analyzed   = true;
-//	analysis_just_finished = true;
-//	Broodwar->sendText("Terrain analysis complete");
-//	return 0;
-//}
-
 void Zerglington::drawStats(){
 	std::set<Unit*> myUnits = Broodwar->self()->getUnits();
 	Broodwar->drawTextScreen(5,0,"I have %d units:",myUnits.size());
@@ -337,53 +297,6 @@ void Zerglington::drawVisibilityData(){
 		}
 	}
 }
-
-//void Zerglington::drawTerrainData(){
-//	//we will iterate through all the base locations, and draw their outlines.
-//	for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++){
-//		TilePosition p=(*i)->getTilePosition();
-//		Position c=(*i)->getPosition();
-//
-//		//draw outline of center location
-//		Broodwar->drawBox(CoordinateType::Map,p.x()*32,p.y()*32,p.x()*32+4*32,p.y()*32+3*32,Colors::Blue,false);
-//
-//		//draw a circle at each mineral patch
-//		for(std::set<BWAPI::Unit*>::const_iterator j=(*i)->getStaticMinerals().begin();j!=(*i)->getStaticMinerals().end();j++){
-//			Position q=(*j)->getInitialPosition();
-//			Broodwar->drawCircle(CoordinateType::Map,q.x(),q.y(),30,Colors::Cyan,false);
-//		}
-//
-//		//draw the outlines of vespene geysers
-//		for(std::set<BWAPI::Unit*>::const_iterator j=(*i)->getGeysers().begin();j!=(*i)->getGeysers().end();j++){
-//			TilePosition q=(*j)->getInitialTilePosition();
-//			Broodwar->drawBox(CoordinateType::Map,q.x()*32,q.y()*32,q.x()*32+4*32,q.y()*32+2*32,Colors::Orange,false);
-//		}
-//
-//		//if this is an island expansion, draw a yellow circle around the base location
-//		if ((*i)->isIsland())
-//			Broodwar->drawCircle(CoordinateType::Map,c.x(),c.y(),80,Colors::Yellow,false);
-//	}
-//
-//	//we will iterate through all the regions and draw the polygon outline of it in green.
-//	for(std::set<BWTA::Region*>::const_iterator r=BWTA::getRegions().begin();r!=BWTA::getRegions().end();r++){
-//		BWTA::Polygon p=(*r)->getPolygon();
-//		for(int j=0;j<(int)p.size();j++)
-//		{
-//			Position point1=p[j];
-//			Position point2=p[(j+1) % p.size()];
-//			Broodwar->drawLine(CoordinateType::Map,point1.x(),point1.y(),point2.x(),point2.y(),Colors::Green);
-//		}
-//	}
-//
-//	//we will visualize the chokepoints with red lines
-//	for(std::set<BWTA::Region*>::const_iterator r=BWTA::getRegions().begin();r!=BWTA::getRegions().end();r++){
-//		for(std::set<BWTA::Chokepoint*>::const_iterator c=(*r)->getChokepoints().begin();c!=(*r)->getChokepoints().end();c++){
-//			Position point1=(*c)->getSides().first;
-//			Position point2=(*c)->getSides().second;
-//			Broodwar->drawLine(CoordinateType::Map,point1.x(),point1.y(),point2.x(),point2.y(),Colors::Red);
-//		}
-//	}
-//}
 
 void Zerglington::showPlayers(){
 	std::set<Player*> players=Broodwar->getPlayers();
