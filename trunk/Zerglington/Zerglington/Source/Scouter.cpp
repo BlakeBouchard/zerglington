@@ -3,12 +3,7 @@
 using namespace BWAPI;
 using namespace std;
 
-vector<Unit*> scouts;
-set<BWTA::BaseLocation*> startLocations;
-set<BWTA::BaseLocation*> unscouted;
-map<BWTA::BaseLocation*, Unit* > enroute;
-BWTA::BaseLocation* enemyBase;
-
+bool foundEnemyBase;
 bool analyzed;
 bool analysis_just_finished;
 BWTA::Region* home;
@@ -18,7 +13,7 @@ Scouter::Scouter(void)
 {
 	analyzed = false;
 	analysis_just_finished = false;
-	enemyBase = NULL;
+	foundEnemyBase = false;
 }
 
 Scouter::~Scouter(void)
@@ -27,6 +22,8 @@ Scouter::~Scouter(void)
 
 void Scouter::initialize(void)
 {
+	startLocations = Broodwar->getStartLocations();
+	unscouted = startLocations;
 	BWTA::readMap();
 	Broodwar->printf("Analyzing map... this may take a minute");
 	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
@@ -34,25 +31,46 @@ void Scouter::initialize(void)
 
 void Scouter::addOverlord(Unit* overlord)
 {
-	scouts.push_back(overlord);
+	TilePosition furthest = findFurthestUnscouted(overlord);
+	scouts.insert(ScoutPair(overlord, furthest));
+	unscouted.erase(furthest);
 	Broodwar->sendText("Added Overlord to scouts");
 }
 
 void Scouter::addZergling(Unit* zergling)
 {
-	scouts.push_back(zergling);
+	TilePosition furthest = findFurthestUnscouted(zergling);
+	scouts.insert(ScoutPair(zergling, furthest));
+	unscouted.erase(furthest);
 	Broodwar->sendText("Added Zergling to scouts");
 }
 
-BWTA::BaseLocation* findNearestUnscouted(Unit* unit)
+TilePosition Scouter::findFurthestUnscouted(Unit* unit)
 {
-	set<BWTA::BaseLocation*>::iterator i = unscouted.begin();
-	BWTA::BaseLocation* closest = (*i);
-	Position unitPosition = unit->getPosition();
+	TileSet::iterator i = unscouted.begin();
+	TilePosition furthest = (*i);
+	TilePosition unitPosition = unit->getTilePosition();
 	
 	for (++i; i != unscouted.end(); i++)
 	{
-		if ((*i)->getPosition().getDistance(unitPosition) < closest->getPosition().getDistance(unitPosition))
+		if ((*i).getDistance(unitPosition) > furthest.getDistance(unitPosition))
+		{
+			furthest = (*i);
+		}
+	}
+
+	return furthest;
+}
+
+TilePosition Scouter::findNearestUnscouted(Unit* unit)
+{
+	TileSet::iterator i = unscouted.begin();
+	TilePosition closest = (*i);
+	TilePosition unitPosition = unit->getTilePosition();
+	
+	for (++i; i != unscouted.end(); i++)
+	{
+		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
 		{
 			closest = (*i);
 		}
@@ -61,89 +79,74 @@ BWTA::BaseLocation* findNearestUnscouted(Unit* unit)
 	return closest;
 }
 
-void Scouter::foundBase(BWTA::BaseLocation* base)
+TilePosition Scouter::findNearestStart(Unit* unit)
 {
-	enemyBase = base;
-	Broodwar->sendText("Found enemy base");
+	TileSet::iterator i = startLocations.begin();
+	TilePosition closest = (*i);
+	TilePosition unitPosition = unit->getTilePosition();
+	
+	for (++i; i != startLocations.end(); i++)
+	{
+		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
+		{
+			closest = (*i);
+		}
+	}
+
+	return closest;
 }
 
-bool Scouter::foundEnemyBase()
+void Scouter::foundBase(TilePosition basePosition)
 {
-	return enemyBase != NULL;
+	enemyBase = basePosition;
+	foundEnemyBase = true;
+	Broodwar->sendText("Found enemy base");
 }
 
 void Scouter::foundUnit(Unit* unit)
 {
-	BWTA::Region* enemyRegion = BWTA::getRegion(unit->getTilePosition());
-
-	// Determine if enemy unit's location is the same region as a possible enemy starting location
-	for (set<BWTA::BaseLocation*>::iterator i = startLocations.begin(); i != startLocations.end(); i++)
+	if (unit->getType().isBuilding())
 	{
-		if ((*i)->getRegion() == enemyRegion)
-		{
-			foundBase(*i);
-			break;
-		}
+		foundBase(unit->getTilePosition());
 	}
 }
 
-BWTA::Region* Scouter::getEnemyBase(void)
+TilePosition Scouter::getEnemyBase(void)
 {
-	if (foundEnemyBase())
-		return enemyBase->getRegion();
-	else
-		return NULL;
+	return enemyBase;
 }
 
 void Scouter::updateScouts(void)
 {
-	if (analysis_just_finished)
+	for (ScoutMap::iterator i = scouts.begin(); i != scouts.end(); i++)
 	{
-		startLocations = BWTA::getStartLocations();
-		unscouted = startLocations;
-		Broodwar->printf("Found %d start locations", startLocations.size());
-		analysis_just_finished = false;
-	}
-
-	if (analyzed)
-	{
-		if (!unscouted.empty())
+		Unit* scout = i->first;
+		Position destination = Position(i->second);
+		if (scout->isUnderAttack())
 		{
-			for (vector<Unit*>::iterator i = scouts.begin(); i != scouts.end(); i++)
+			if (scout->getType().isFlyer())
 			{
-				if ((*i)->isIdle())
-				{
-					BWTA::BaseLocation* nearest = findNearestUnscouted((*i));
-					(*i)->move(nearest->getPosition());
-					unscouted.erase(nearest);
-					enroute.insert(pair<BWTA::BaseLocation*, Unit*>(nearest, (*i)));
-					Broodwar->sendText("Scout moving to position");
-				}
+				TilePosition nearest = findFurthestUnscouted(scout);
+				unscouted.insert(i->second);
+				scout->move(Position(nearest));
+				i->second = nearest;
+			}
+			else
+			{
+				TilePosition furthest = findFurthestUnscouted(scout);
+				unscouted.insert(i->second);
+				scout->move(Position(furthest));
+				i->second = furthest;
 			}
 		}
-		if (!enroute.empty())
+		else if (scout->getPosition() == destination)
 		{
-			for (map<BWTA::BaseLocation*, Unit*>::iterator i = enroute.begin(); i != enroute.end(); i++)
-			{
-				if (i->first->getPosition() == i->second->getPosition())
-				{
-					enroute.erase(i);
-				}
-			}
+			i->second = findNearestUnscouted(scout);
+			scout->move(Position(i->second));
 		}
-		if (!foundEnemyBase() && enroute.empty() && unscouted.empty())
+		else
 		{
-			Broodwar->sendText("WARNING: No more BaseLocations to scout, no bases found");
-		}
-	}
-	else
-	{
-		for (vector<Unit*>::iterator i = scouts.begin(); i != scouts.end(); i++)
-		{
-			if ((*i)->isIdle())
-			{
-				
-			}
+			scout->move(Position(i->second));
 		}
 	}
 }

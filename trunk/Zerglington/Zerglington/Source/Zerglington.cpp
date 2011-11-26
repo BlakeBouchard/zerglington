@@ -215,7 +215,7 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 			hasSpawningPool = true;
 
 
-		if (!scouter.foundEnemyBase())
+		if (!foundEnemyBase)
 		{
 			if (unit->getType().isFlyer())
 			{
