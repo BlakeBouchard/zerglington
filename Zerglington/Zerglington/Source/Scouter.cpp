@@ -33,17 +33,17 @@ void Scouter::initialize(void)
 
 void Scouter::addOverlord(Unit* overlord)
 {
-	TilePosition furthest = findFurthestUnscouted(overlord);
-	scouts.insert(ScoutPair(overlord, furthest));
-	unscouted.erase(furthest);
+	TilePosition destination = findNearestUnscouted(overlord);
+	scouts.insert(ScoutPair(overlord, destination));
+	unscouted.erase(destination);
 	Broodwar->sendText("Added Overlord to scouts");
 }
 
 void Scouter::addZergling(Unit* zergling)
 {
-	TilePosition furthest = findFurthestUnscouted(zergling);
-	scouts.insert(ScoutPair(zergling, furthest));
-	unscouted.erase(furthest);
+	TilePosition destination = findFurthestUnscouted(zergling);
+	scouts.insert(ScoutPair(zergling, destination));
+	unscouted.erase(destination);
 	Broodwar->sendText("Added Zergling to scouts");
 }
 
@@ -81,22 +81,22 @@ TilePosition Scouter::findNearestUnscouted(Unit* unit)
 	return closest;
 }
 
-//TilePosition Scouter::findNearestStart(Unit* unit)
-//{
-//	TileSet::iterator i = startLocations.begin();
-//	TilePosition closest = (*i);
-//	TilePosition unitPosition = unit->getTilePosition();
-//	
-//	for (++i; i != startLocations.end(); i++)
-//	{
-//		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
-//		{
-//			closest = (*i);
-//		}
-//	}
-//
-//	return closest;
-//}
+TilePosition Scouter::findNearestStart(Unit* unit)
+{
+	TileSet::iterator i = startLocations.begin();
+	TilePosition closest = (*i);
+	TilePosition unitPosition = unit->getTilePosition();
+	
+	for (++i; i != startLocations.end(); i++)
+	{
+		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
+		{
+			closest = (*i);
+		}
+	}
+
+	return closest;
+}
 
 void Scouter::foundBase(TilePosition basePosition)
 {
