@@ -26,6 +26,7 @@ void Striker::addZergling(Unit* unit)
 
 void Striker::addAllZerglings(void)
 {
+	strikers.clear();
 	set<Unit*> allUnits = Broodwar->getAllUnits();
 	for (set<Unit*>::iterator i = allUnits.begin(); i != allUnits.end(); i++)
 	{
@@ -45,7 +46,8 @@ void Striker::updateStrikers(void)
 	{
 		for (vector<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
-			(*i)->attack(enemyBase);
+			if ((*i)->isIdle())
+				(*i)->attack(enemyBase);
 		}
 	}
 }

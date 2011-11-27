@@ -169,6 +169,16 @@ void Zerglington::onUnitCreate(BWAPI::Unit* unit){
 				seconds%=60;
 				Broodwar->sendText("%.2d:%.2d: %s creates a %s",minutes,seconds,unit->getPlayer()->getName().c_str(),unit->getType().getName().c_str());
 			}
+
+			if (unit->getType().getID() == UnitTypes::Zerg_Zergling)
+			{
+				if (!foundEnemyBase)
+					// Enemy base not yet found, pass Zergling to Scouter
+					scouter.addZergling(unit);
+				else
+					// Enemy base found, pass Zergling to Striker
+					striker.addZergling(unit);
+			}
 		}
 	}
 }
