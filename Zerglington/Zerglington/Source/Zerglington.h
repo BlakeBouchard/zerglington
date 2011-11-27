@@ -6,7 +6,7 @@
 #include <queue>
 #include <map>
 
-enum morph{DRONE, POOL, LING};
+enum morph{DRONE, POOL, LORD, LING};
 
 class Zerglington : public BWAPI::AIModule
 {
