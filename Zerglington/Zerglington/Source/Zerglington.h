@@ -12,6 +12,7 @@ enum morph{DRONE, POOL, LORD, LING};
 class Zerglington : public BWAPI::AIModule
 {
 public:
+	~Zerglington(){ workers.clear(); }
 	virtual void onStart();
 	virtual void onEnd(bool isWinner);
 	virtual void onFrame();
