@@ -67,4 +67,7 @@ public:
 
 	//Finds a place to build (morph) a spawning pool
 	BWAPI::TilePosition getBuildLoc();
+
+	//Checks whether a building spawning pool is finished
+	void checkSpawningPool();
 };

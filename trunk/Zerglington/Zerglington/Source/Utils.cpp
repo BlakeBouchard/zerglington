@@ -36,6 +36,18 @@ Unit* Zerglington::getOneLarva(){
 	}
 }
 
+//Checks whether a building spawning pool is finished
+void Zerglington::checkSpawningPool(){
+	for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+		//Find a spawning pool -> if no longer morphing, set flag to true
+		if (strcmp((*i)->getType().getName().c_str(), "Zerg Spawning Pool") == 0
+			&& (*i)->isCompleted()){
+				hasSpawningPool = true;
+				return;
+		}
+	}
+}
+
 //Sends a drone to mine at the nearest mineral patch
 void Zerglington::sendToMine(BWAPI::Unit *unit){
 	//Only give command if drone is not yet gathering minerals
@@ -71,7 +83,9 @@ int Zerglington::mostNeededJob(){
 
 //Performs unit creation operations such as morphing drones and zerglings
 void Zerglington::larvaMorphing(){
-	//Broodwar->sendText("MorphQ size is %d", morphQ.size());
+	if(isMorphingSpawningPool && !hasSpawningPool) //Check whether our pool is finished
+		checkSpawningPool();
+
 	//Check whether we have the resources to morph the next unit in the morph queue, and do it if possible
 	if(morphQ.size() != 0){ //First see if there's anything left to morph
 		if(morphQ.front() == DRONE && Broodwar->canMake(NULL, UnitTypes::Zerg_Drone)){
