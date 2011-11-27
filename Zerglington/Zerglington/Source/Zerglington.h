@@ -6,7 +6,7 @@
 #include <queue>
 #include <map>
 
-enum morph{DRONE, POOL};
+enum morph{DRONE, POOL, LING};
 
 class Zerglington : public BWAPI::AIModule
 {
@@ -58,6 +58,9 @@ public:
 
 	//Determines the most needed job of a worker given the current conditions
 	int mostNeededJob();
+
+	//Performs unit creation operations such as morphing drones and zerglings
+	void larvaMorphing();
 
 	//Finds a place to build (morph) a spawning pool
 	BWAPI::TilePosition getBuildLoc();
