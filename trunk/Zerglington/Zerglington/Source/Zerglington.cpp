@@ -8,7 +8,7 @@ void Zerglington::onStart(){
 	Broodwar->sendText("Blake Bouchard and Teri Drummond");
 	//Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
 	// Enable some cheat flags
-	Broodwar->enableFlag(Flag::UserInput);
+	//Broodwar->enableFlag(Flag::UserInput);
 	// Uncomment to enable complete map information
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
 
@@ -223,12 +223,12 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 			if (unit->getType().isFlyer())
 			{
 				// Unit is Overlord, pass to Scouter
-				scouter.addOverlord(unit);
+	//			scouter.addOverlord(unit);
 			}
 			else if (strcmp(unit->getType().getName().c_str(), "Zerg Zergling") == 0)
 			{
 				// Enemy base not yet found, pass zergling to scouter
-				scouter.addZergling(unit);
+	//			scouter.addZergling(unit);
 			}
 		}
 	}else{

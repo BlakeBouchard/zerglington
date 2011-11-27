@@ -8,7 +8,7 @@ void Zerglington::initBuildOrder(){
 	morphQ.push(DRONE);
 	morphQ.push(POOL);
 	morphQ.push(DRONE);
-	morphQ.push(LING); morphQ.push(LING); morphQ.push(LING);
+	morphQ.push(LING);
 }
 
 //Given a unit i, return a pointer to the mineral patch it is closest to
@@ -56,7 +56,7 @@ int Zerglington::mostNeededJob(){
 
 //Performs unit creation operations such as morphing drones and zerglings
 void Zerglington::larvaMorphing(){
-	Broodwar->sendText("MorphQ size is %d", morphQ.size());
+	//Broodwar->sendText("MorphQ size is %d", morphQ.size());
 	//Check whether we have the resources to morph the next unit in the morph queue, and do it if possible
 	if(morphQ.size() != 0){ //First see if there's anything left to morph
 		if(morphQ.front() == DRONE && Broodwar->canMake(NULL, UnitTypes::Zerg_Drone)){
@@ -84,12 +84,28 @@ void Zerglington::larvaMorphing(){
 					if (myLarva.size()>0){
 						Unit* larva=*myLarva.begin();
 						larva->morph(UnitTypes::Zerg_Zergling);
-						morphQ.pop(); //Remove this task from the queue
+						//morphQ.pop(); //Remove this task from the queue
 					}
 				}
 			}
 		}
-	}else{
+		else if(morphQ.front() == LING && hasSpawningPool && Broodwar->canMake(NULL, UnitTypes::Zerg_Overlord)){
+			//Case 3: Make an overlord so we can make more zerglings
+			//Get the hatchery, then get the larva to morph into an overlord
+			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+				if ((*i)->getType().isResourceDepot()){
+					//Select one larvae and morph into zergling.
+					std::set<Unit*> myLarva=(*i)->getLarva();
+					if (myLarva.size()>0){
+						Unit* larva=*myLarva.begin();
+						larva->morph(UnitTypes::Zerg_Overlord);
+						//morphQ.pop(); //Remove this task from the queue
+					}
+				}
+			}
+		}
+	}
+	//}else{
 		//The morph queue is empty, so continue building zerglings and overlords
 		//Determine ratio of controlled units to overlords' max control
 		/*int maxControl = 0;
@@ -118,7 +134,7 @@ void Zerglington::larvaMorphing(){
 				}
 			}
 		}*/
-	}
+	//}
 }
 
 //Finds a place to build a spawning pool
