@@ -8,6 +8,7 @@ void Zerglington::initBuildOrder(){
 	morphQ.push(DRONE);
 	morphQ.push(POOL);
 	morphQ.push(DRONE);
+	morphQ.push(LORD);
 	morphQ.push(LING);
 }
 
@@ -94,8 +95,15 @@ void Zerglington::larvaMorphing(){
 			larva->morph(UnitTypes::Zerg_Drone);
 			morphQ.pop(); //Remove this task from the queue
 		}
+		else if(morphQ.front() == LORD && Broodwar->canMake(NULL, UnitTypes::Zerg_Overlord)){
+			//Case 2: Next in morph queue is an overlord
+			//Get the hatchery, then get the larva to morph into an overlord
+			Unit* larva = getOneLarva();
+			larva->morph(UnitTypes::Zerg_Overlord);
+			morphQ.pop(); //Remove this task from the queue
+		}
 		else if(morphQ.front() == LING && Broodwar->canMake(NULL, UnitTypes::Zerg_Zergling)){
-			//Case 2: Next in morph queue is a zergling. This means that it's time to pump out zerglings
+			//Case 3: Next in morph queue is a zergling. This means that it's time to pump out zerglings nonstop
 			Unit* larva = getOneLarva();
 			larva->morph(UnitTypes::Zerg_Zergling);
 			//We no longer pop the task from the queue because we want to keep making zerglings
