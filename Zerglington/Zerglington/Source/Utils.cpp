@@ -21,6 +21,21 @@ Unit* Zerglington::findClosestMineral(Unit *i){
 	return closestMineral;
 }
 
+//Finds one larva and returns a pointer to it
+Unit* Zerglington::getOneLarva(){
+	//Get the hatchery, then get the larva and return it
+	for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
+		if ((*i)->getType().isResourceDepot()){
+			//Select one the first larva of the set
+			std::set<Unit*> myLarva=(*i)->getLarva();
+			if (myLarva.size()>0){
+				Unit* larva=*myLarva.begin();
+				return larva;
+			}
+		}
+	}
+}
+
 //Sends a drone to mine at the nearest mineral patch
 void Zerglington::sendToMine(BWAPI::Unit *unit){
 	//Only give command if drone is not yet gathering minerals
@@ -61,80 +76,24 @@ void Zerglington::larvaMorphing(){
 	if(morphQ.size() != 0){ //First see if there's anything left to morph
 		if(morphQ.front() == DRONE && Broodwar->canMake(NULL, UnitTypes::Zerg_Drone)){
 			//Case 1: Next in morph queue is a drone
-			//Get the hatchery, then get the larva to morph into a drone
-			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-				if ((*i)->getType().isResourceDepot()){
-					//Select one larvae and morph into drone.
-					std::set<Unit*> myLarva=(*i)->getLarva();
-					if (myLarva.size()>0){
-						Unit* larva=*myLarva.begin();
-						larva->morph(UnitTypes::Zerg_Drone);
-						morphQ.pop(); //Remove this task from the queue
-					}
-				}
-			}
+			Unit* larva = getOneLarva();
+			larva->morph(UnitTypes::Zerg_Drone);
+			morphQ.pop(); //Remove this task from the queue
 		}
 		else if(morphQ.front() == LING && Broodwar->canMake(NULL, UnitTypes::Zerg_Zergling)){
-			//Case 2: Next in morph queue is a zergling
-			//Get the hatchery, then get the larva to morph into a zergling
-			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-				if ((*i)->getType().isResourceDepot()){
-					//Select one larvae and morph into zergling.
-					std::set<Unit*> myLarva=(*i)->getLarva();
-					if (myLarva.size()>0){
-						Unit* larva=*myLarva.begin();
-						larva->morph(UnitTypes::Zerg_Zergling);
-						//morphQ.pop(); //Remove this task from the queue
-					}
-				}
-			}
+			//Case 2: Next in morph queue is a zergling. This means that it's time to pump out zerglings
+			Unit* larva = getOneLarva();
+			larva->morph(UnitTypes::Zerg_Zergling);
+			//We no longer pop the task from the queue because we want to keep making zerglings
 		}
 		else if(morphQ.front() == LING && hasSpawningPool && Broodwar->canMake(NULL, UnitTypes::Zerg_Overlord)){
-			//Case 3: Make an overlord so we can make more zerglings
+			//Case 3: We want zerglings, we have a spawning pool, but we can't make zerlings -> must make overlord to increase control
 			//Get the hatchery, then get the larva to morph into an overlord
-			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-				if ((*i)->getType().isResourceDepot()){
-					//Select one larvae and morph into zergling.
-					std::set<Unit*> myLarva=(*i)->getLarva();
-					if (myLarva.size()>0){
-						Unit* larva=*myLarva.begin();
-						larva->morph(UnitTypes::Zerg_Overlord);
-						//morphQ.pop(); //Remove this task from the queue
-					}
-				}
-			}
+			Unit* larva = getOneLarva();
+			larva->morph(UnitTypes::Zerg_Overlord);
+			//We do not pop a task from the queue because we want to continue making zerglings or overlords when necessary
 		}
 	}
-	//}else{
-		//The morph queue is empty, so continue building zerglings and overlords
-		//Determine ratio of controlled units to overlords' max control
-		/*int maxControl = 0;
-		int controlledUnits = 0;
-		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-			if (strcmp((*i)->getType().getName().c_str(), "Zerg Overlord") == 0){
-				maxControl+=8; //Get 8 control per overlord
-			}else if(!(*i)->getType().isBuilding()){
-				controlledUnits++;
-			}
-		}
-		if(controlledUnits < maxControl && Broodwar->canMake(NULL, UnitTypes::Zerg_Zergling)){
-			//Morph a zergling if possible
-			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-				if (strcmp((*i)->getType().getName().c_str(), "Zerg Larva") == 0){
-					(*i)->morph(UnitTypes::Zerg_Zergling);
-					break;
-				}
-			}
-		}else if(controlledUnits >= maxControl && Broodwar->canMake(NULL, UnitTypes::Zerg_Overlord)){
-			//Morph an overlord if we need to increase control
-			for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-				if (strcmp((*i)->getType().getName().c_str(), "Zerg Larva") == 0){
-					(*i)->morph(UnitTypes::Zerg_Overlord);
-					break;
-				}
-			}
-		}*/
-	//}
 }
 
 //Finds a place to build a spawning pool

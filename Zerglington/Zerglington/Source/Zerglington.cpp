@@ -223,12 +223,12 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 			if (unit->getType().isFlyer())
 			{
 				// Unit is Overlord, pass to Scouter
-	//			scouter.addOverlord(unit);
+				scouter.addOverlord(unit);
 			}
 			else if (strcmp(unit->getType().getName().c_str(), "Zerg Zergling") == 0)
 			{
 				// Enemy base not yet found, pass zergling to scouter
-	//			scouter.addZergling(unit);
+				scouter.addZergling(unit);
 			}
 		}
 	}else{
