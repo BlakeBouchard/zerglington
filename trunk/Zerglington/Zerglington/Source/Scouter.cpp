@@ -28,6 +28,10 @@ void Scouter::initialize(void)
 	startLocations = Broodwar->getStartLocations();
 	unscouted = startLocations;
 	unscouted.erase(homeBase);
+	if (unscouted.size() == 1)
+	{
+		foundBase(*unscouted.begin());
+	}
 	BWTA::readMap();
 	Broodwar->printf("Analyzing map... this may take a minute");
 	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
