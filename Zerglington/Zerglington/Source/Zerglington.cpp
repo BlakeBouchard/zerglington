@@ -66,7 +66,7 @@ void Zerglington::onFrame(){
 	drawStats();
 
 	//Manage larva
-	larvaMorphing();
+	larvaMorphing(); //Creates drones/zerglings/overlords
 
 	//Mange Workers
 	for(std::map<int, Worker*>::const_iterator i = workers.begin(); i != workers.end(); i++){
@@ -78,7 +78,7 @@ void Zerglington::onFrame(){
 		if((*i).second->getJob() == MINERALS){					//Send to mineral patch
 			sendToMine((*i).second->getUnit());
 		}
-		else if((*i).second->getJob() == MORPH){					//Send to morph into spawning pool
+		else if((*i).second->getJob() == MORPH){				//Send to morph into spawning pool
 			sendToMorph((*i).second->getUnit());
 		}
 	}
@@ -214,9 +214,7 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
 			workers.insert(std::pair<int, Worker*>(unit->getID(), new Worker(IDLE, unit))); //Add it to container
 			droneCount++;
-		}else if(strcmp(unit->getType().getName().c_str(), "Zerg Spawning Pool") == 0)
-			hasSpawningPool = true;
-
+		}
 
 		if (!foundEnemyBase)
 		{
