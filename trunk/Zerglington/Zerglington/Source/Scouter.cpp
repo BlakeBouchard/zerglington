@@ -14,6 +14,8 @@ Scouter::Scouter(void)
 	analyzed = false;
 	analysis_just_finished = false;
 	foundEnemyBase = false;
+
+	firstOverlord = NULL;
 }
 
 Scouter::~Scouter(void)
@@ -35,6 +37,8 @@ void Scouter::addOverlord(Unit* overlord)
 {
 	if (unscouted.empty())
 		return;
+	if (firstOverlord == NULL)
+		firstOverlord = overlord;
 	TilePosition destination = findNearestUnscouted(overlord);
 	scouts.insert(ScoutPair(overlord, destination));
 	unscouted.erase(destination);
@@ -49,6 +53,17 @@ void Scouter::addZergling(Unit* zergling)
 	scouts.insert(ScoutPair(zergling, destination));
 	unscouted.erase(destination);
 	Broodwar->sendText("Added Zergling to scouts");
+}
+
+void Scouter::dumpZerglings(void)
+{
+	for (ScoutMap::iterator i = scouts.begin(); i != scouts.end(); i++)
+	{
+		if (i->first->getType().getID() == UnitTypes::Zerg_Zergling)
+		{
+			scouts.erase(i);
+		}
+	}
 }
 
 TilePosition Scouter::findFurthestUnscouted(Unit* unit)
@@ -111,6 +126,7 @@ void Scouter::foundBase(TilePosition basePosition)
 	enemyBase = basePosition;
 	foundEnemyBase = true;
 	Broodwar->sendText("Found enemy base");
+	dumpZerglings();
 }
 
 void Scouter::foundUnit(Unit* unit)
@@ -129,36 +145,43 @@ TilePosition Scouter::getEnemyBase(void)
 
 void Scouter::updateScouts(void)
 {
-	for (ScoutMap::iterator i = scouts.begin(); i != scouts.end(); i++)
+	if (!foundEnemyBase)
 	{
-		Unit* scout = i->first;
-		Position destination = Position(i->second);
-		if (scout->isUnderAttack())
+		for (ScoutMap::iterator i = scouts.begin(); i != scouts.end(); i++)
 		{
-			if (scout->getType().isFlyer())
+			Unit* scout = i->first;
+			Position destination = Position(i->second);
+			if (scout->isUnderAttack())
 			{
-				TilePosition nearest = findNearestUnscouted(scout);
-				unscouted.insert(i->second);
-				scout->move(Position(nearest));
-				i->second = nearest;
+				if (scout->getType().isFlyer())
+				{
+					TilePosition nearest = findNearestUnscouted(scout);
+					unscouted.insert(i->second);
+					scout->move(Position(nearest));
+					i->second = nearest;
+				}
+				else
+				{
+					TilePosition furthest = findFurthestUnscouted(scout);
+					unscouted.insert(i->second);
+					scout->move(Position(furthest));
+					i->second = furthest;
+				}
+			}
+			else if (Broodwar->isVisible(i->second))
+			{
+				i->second = findNearestUnscouted(scout);
+				scout->move(Position(i->second));
 			}
 			else
 			{
-				TilePosition furthest = findFurthestUnscouted(scout);
-				unscouted.insert(i->second);
-				scout->move(Position(furthest));
-				i->second = furthest;
+				scout->move(Position(i->second));
 			}
 		}
-		else if (Broodwar->isVisible(i->second))
-		{
-			i->second = findNearestUnscouted(scout);
-			scout->move(Position(i->second));
-		}
-		else
-		{
-			scout->move(Position(i->second));
-		}
+	}
+	else
+	{
+		
 	}
 }
 

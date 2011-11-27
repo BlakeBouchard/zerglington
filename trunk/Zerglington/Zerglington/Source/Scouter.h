@@ -28,6 +28,7 @@ public:
 	void initialize(void);
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
+	void dumpZerglings(void);
 	void drawTerrainData();
 	void foundBase(BWAPI::TilePosition);
 	void foundUnit(BWAPI::Unit*);
@@ -49,4 +50,5 @@ private:
 	TileSet unscouted;
 	ScoutMap scouts;
 	BWAPI::TilePosition enemyBase;
+	BWAPI::Unit* firstOverlord;
 };

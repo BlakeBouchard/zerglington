@@ -1,6 +1,7 @@
 #include "Zerglington.h"
 using namespace BWAPI;
 
+Striker striker;
 Scouter scouter;
 
 void Zerglington::onStart(){
@@ -82,39 +83,17 @@ void Zerglington::onFrame(){
 			sendToMorph((*i).second->getUnit());
 		}
 	}
-
-	if (Broodwar->getFrameCount()%30==0 /*&& analyzed*/){
-		
+	if (Broodwar->getFrameCount()%30==0){
 		// Update Scouts
-		scouter.updateScouts(); 
-		/*if (enemy_base == NULL && scouter.foundEnemyBase())
+		scouter.updateScouts();
+	}
+	if (foundEnemyBase && Broodwar->getFrameCount()%15==0){
+		if (!striker.initialized)
 		{
-			enemy_base = scouter.getEnemyBase();
-			Broodwar->sendText("Found enemy base");
-		}*/
-
-		/*//order one of our workers to guard our chokepoint.
-		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
-		if ((*i)->getType().isWorker()){
-		//get the chokepoints linked to our home region
-		std::set<BWTA::Chokepoint*> chokepoints= home->getChokepoints();
-		double min_length=10000;
-		BWTA::Chokepoint* choke=NULL;
-
-		//iterate through all chokepoints and look for the one with the smallest gap (least width)
-		for(std::set<BWTA::Chokepoint*>::iterator c=chokepoints.begin();c!=chokepoints.end();c++){
-		double length=(*c)->getWidth();
-		if (length<min_length || choke==NULL){
-		min_length=length;
-		choke=*c;
+			striker.initialize(scouter.getEnemyBase());
 		}
-		}
-
-		//order the worker to move to the center of the gap
-		(*i)->rightClick(choke->getCenter());
-		break;
-		}
-		}*/
+		// Update Strikers
+		striker.updateStrikers();
 	}
 	if (analyzed)
 		scouter.drawTerrainData();
@@ -216,18 +195,18 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 			droneCount++;
 		}
 
-		if (!foundEnemyBase)
+		if (unit->getType().getID() == UnitTypes::Zerg_Overlord)
 		{
-			if (unit->getType().isFlyer())
-			{
-				// Unit is Overlord, pass to Scouter
-				scouter.addOverlord(unit);
-			}
-			else if (strcmp(unit->getType().getName().c_str(), "Zerg Zergling") == 0)
-			{
-				// Enemy base not yet found, pass zergling to scouter
+			scouter.addOverlord(unit);
+		}
+		else if (unit->getType().getID() == UnitTypes::Zerg_Zergling)
+		{
+			if (!foundEnemyBase)
+				// Enemy base not yet found, pass Zergling to Scouter
 				scouter.addZergling(unit);
-			}
+			else
+				// Enemy base found, pass Zergling to Striker
+				striker.addZergling(unit);
 		}
 	}else{
 		/*if we are in a replay, then we will print out the build order

@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "Scouter.h"
+#include "Striker.h"
 #include "Worker.h"
 
 #include <queue>
