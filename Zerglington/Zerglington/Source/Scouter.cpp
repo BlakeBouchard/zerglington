@@ -185,7 +185,8 @@ void Scouter::updateScouts(void)
 	}
 	else
 	{
-		
+		if (firstOverlord->isIdle())
+			firstOverlord->move(Position(enemyBase));
 	}
 }
 
