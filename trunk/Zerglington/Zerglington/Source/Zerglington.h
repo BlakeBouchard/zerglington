@@ -59,6 +59,9 @@ public:
 	//Determines the most needed job of a worker given the current conditions
 	int mostNeededJob();
 
+	//Finds one larva and returns a pointer to it
+	BWAPI::Unit* getOneLarva();
+
 	//Performs unit creation operations such as morphing drones and zerglings
 	void larvaMorphing();
 
