@@ -65,6 +65,9 @@ void Zerglington::onFrame(){
 
 	drawStats();
 
+	//Manage larva
+	larvaMorphing();
+
 	//Mange Workers
 	for(std::map<int, Worker*>::const_iterator i = workers.begin(); i != workers.end(); i++){
 		//First determine the role the unit should have (morphing takes priority, don't change that job)
