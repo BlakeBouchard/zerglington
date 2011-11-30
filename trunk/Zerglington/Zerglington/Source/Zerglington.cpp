@@ -28,18 +28,11 @@ void Zerglington::onStart(){
 			Broodwar->self()->getRace().getName().c_str(),
 			Broodwar->enemy()->getRace().getName().c_str());
 
-		initBuildOrder(); //Initialize the build order
-		posBuild = getBuildLoc(); //Determine where the spawning pool should be placed
-		hasSpawningPool = false;
-		isMorphingSpawningPool = false;
-		droneCount = 0;
-
 		//Iterate through all units at game start
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
 			//Set all workers to mine
 			if ((*i)->getType().isWorker()){
-				workers.insert(std::pair<int, Worker*>((*i)->getID(), new Worker(IDLE, *i)));
-				droneCount++;
+				workerManager.addWorker(*i);
 			}
 			else if ((*i)->getType().isFlyer()){
 				scouter.addOverlord((*i));
@@ -67,22 +60,10 @@ void Zerglington::onFrame(){
 	drawStats();
 
 	//Manage larva
-	larvaMorphing(); //Creates drones/zerglings/overlords
+	workerManager.larvaMorphing(); //Creates drones/zerglings/overlords
 
-	//Mange Workers
-	for(std::map<int, Worker*>::const_iterator i = workers.begin(); i != workers.end(); i++){
-		//First determine the role the unit should have (morphing takes priority, don't change that job)
-		if((*i).second->getJob() != MORPH)
-			(*i).second->setJob(mostNeededJob());
-		
-		//Perform the unit's job
-		if((*i).second->getJob() == MINERALS){					//Send to mineral patch
-			sendToMine((*i).second->getUnit());
-		}
-		else if((*i).second->getJob() == MORPH){				//Send to morph into spawning pool
-			sendToMorph((*i).second->getUnit());
-		}
-	}
+	workerManager.manageWorkers();
+
 	if (Broodwar->getFrameCount()%30==0){
 		// Update Scouts
 		scouter.updateScouts();
@@ -139,17 +120,17 @@ void Zerglington::onUnitDiscover(BWAPI::Unit* unit){
 }
 
 void Zerglington::onUnitEvade(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 	//Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitShow(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 	//Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitHide(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
 	//Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
@@ -188,8 +169,7 @@ void Zerglington::onUnitDestroy(BWAPI::Unit* unit){
 		Broodwar->sendText("A %s [%x] has been destroyed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 		//If unit was our drone, remove it from our set
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0 && unit->getPlayer() == Broodwar->self()){
-			workers.erase(unit->getID());
-			droneCount--;
+			workerManager.removeWorker(unit);
 		}
 	}
 }
@@ -201,8 +181,7 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 
 		//If unit was morphed to a drone:
 		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
-			workers.insert(std::pair<int, Worker*>(unit->getID(), new Worker(IDLE, unit))); //Add it to container
-			droneCount++;
+			workerManager.addWorker(unit); //Add it to container
 		}
 
 		if (unit->getType().getID() == UnitTypes::Zerg_Overlord)
