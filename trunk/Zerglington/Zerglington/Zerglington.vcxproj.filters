@@ -21,9 +21,6 @@
     <ClCompile Include="Source\Scouter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Zerglington.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

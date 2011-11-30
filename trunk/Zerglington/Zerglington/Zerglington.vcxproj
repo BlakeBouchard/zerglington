@@ -97,7 +97,6 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\Scouter.cpp" />
     <ClCompile Include="Source\Striker.cpp" />
-    <ClCompile Include="Source\Utils.cpp" />
     <ClCompile Include="Source\Worker.cpp" />
     <ClCompile Include="Source\Zerglington.cpp" />
   </ItemGroup>
