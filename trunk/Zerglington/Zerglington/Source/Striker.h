@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include <vector>
+#include <queue>
 
 class Striker
 {
@@ -15,8 +16,10 @@ public:
 	void updateStrikers(void);
 
 	bool initialized;
+	BWAPI::Position muster;
 
 private:
 	std::vector<BWAPI::Unit*> strikers;
 	BWAPI::Position enemyBase;
+	std::deque<BWAPI::Unit*> targets;
 };
