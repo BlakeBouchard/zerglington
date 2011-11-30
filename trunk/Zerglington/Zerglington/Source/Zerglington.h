@@ -1,8 +1,16 @@
 #pragma once
 #include <BWAPI.h>
+#include <BWTA.h>
+#include <windows.h>
 #include "Scouter.h"
 #include "Striker.h"
 #include "Worker.h"
+
+extern bool analyzed;
+extern bool analysis_just_finished;
+extern BWTA::Region* home;
+extern BWTA::Region* enemy_base;
+DWORD WINAPI AnalyzeThread();
 
 class Zerglington : public BWAPI::AIModule
 {
@@ -25,6 +33,7 @@ public:
 	virtual void onSaveGame(std::string gameName);
 	void drawStats(); //not part of BWAPI::AIModule
 	void drawBullets();
+	void drawTerrainData();
 	void drawVisibilityData();
 	void showPlayers();
 	void showForces();
@@ -32,4 +41,6 @@ public:
 	bool show_visibility_data;
 
 	WorkerManager workerManager;
+	Striker striker;
+	Scouter scouter;
 };
