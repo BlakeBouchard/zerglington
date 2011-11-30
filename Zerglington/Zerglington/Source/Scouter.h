@@ -1,10 +1,8 @@
 #pragma once
 #include <BWAPI.h>
-#include <BWTA.h>
 #include <map>
 #include <set>
 #include <vector>
-#include <windows.h>
 
 // VEGETA. 
 // VEGETA.
@@ -12,11 +10,6 @@
 // VEGETA.
 
 extern bool foundEnemyBase;
-extern bool analyzed;
-extern bool analysis_just_finished;
-extern BWTA::Region* home;
-extern BWTA::Region* enemy_base;
-DWORD WINAPI AnalyzeThread();
 
 class Scouter
 {
@@ -29,7 +22,6 @@ public:
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
 	void dumpZerglings(void);
-	void drawTerrainData();
 	void foundBase(BWAPI::TilePosition);
 	void foundUnit(BWAPI::Unit*);
 	BWAPI::TilePosition getEnemyBase();
