@@ -21,6 +21,7 @@ public:
 	void initialize(void);
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
+	void addAllZerglings(void);
 	void dumpZerglings(void);
 	void foundBase(BWAPI::TilePosition);
 	void foundUnit(BWAPI::Unit*);
