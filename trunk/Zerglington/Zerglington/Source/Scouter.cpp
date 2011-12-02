@@ -48,6 +48,18 @@ void Scouter::addZergling(Unit* zergling)
 	Broodwar->sendText("Added Zergling to scouts");
 }
 
+void Scouter::addAllZerglings(void)
+{
+	set<Unit*> allUnits = Broodwar->self()->getUnits();
+	for (set<Unit*>::iterator i = allUnits.begin(); i != allUnits.end(); i++)
+	{
+		if ((*i)->getType().getID() == UnitTypes::Zerg_Zergling && scouts.find((*i)) == scouts.end())
+		{
+			addZergling(*i);
+		}
+	}
+}
+
 void Scouter::dumpZerglings(void)
 {
 	for (ScoutMap::iterator i = scouts.begin(); i != scouts.end(); i++)

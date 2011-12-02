@@ -202,7 +202,7 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 		{
 			if (!foundEnemyBase)
 				// Enemy base not yet found, pass Zergling to Scouter
-				scouter.addZergling(unit);
+				scouter.addAllZerglings();
 			else
 				// Enemy base found, pass Zergling to Striker
 				striker.addAllZerglings();

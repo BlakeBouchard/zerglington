@@ -29,10 +29,10 @@ void Striker::addZergling(Unit* unit)
 void Striker::addAllZerglings(void)
 {
 	strikers.clear();
-	set<Unit*> allUnits = Broodwar->getAllUnits();
+	set<Unit*> allUnits = Broodwar->self()->getUnits();
 	for (set<Unit*>::iterator i = allUnits.begin(); i != allUnits.end(); i++)
 	{
-		if ((*i)->getPlayer() == Broodwar->self() && (*i)->getType().getID() == UnitTypes::Zerg_Zergling)
+		if ((*i)->getType().getID() == UnitTypes::Zerg_Zergling)
 		{
 			strikers.push_back(*i);
 		}
@@ -79,6 +79,7 @@ void Striker::setEnemyPlayer()
 
 void Striker::setMuster(void)
 {
+	Broodwar->sendText("Setting muster");
 	BWTA::Chokepoint* chokepoint = BWTA::getNearestChokepoint(enemyBase);
 	if (chokepoint != NULL)
 	{
@@ -95,10 +96,12 @@ void Striker::setMuster(void)
 	}
 
 	foundMuster = true;
+	Broodwar->sendText("Muster set successfully");
 }
 
 void Striker::setTarget(void)
 {
+	Broodwar->sendText("Setting target");
 	set<Unit*> enemyUnits = enemyPlayer->getUnits();
 	if (enemyUnits.empty())
 		return;
@@ -134,10 +137,10 @@ void Striker::setTarget(void)
 	}
 	else
 	{
-		muster = enemyBase;
-		foundMuster = true;
 		target = findNearestToMuster(enemyUnits);
 	}
+
+	Broodwar->sendText("Set target successfully");
 }
 
 void Striker::updateStrikers(void)
@@ -152,7 +155,7 @@ void Striker::updateStrikers(void)
 		setMuster();
 	}
 
-	if (!target->isVisible())
+	if (!target->isVisible() || target == NULL)
 	{
 		foundPriority = false;
 		setTarget();
@@ -160,7 +163,7 @@ void Striker::updateStrikers(void)
 
 	for (vector<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 	{
-		if (foundPriority && target->isVisible())
+		if (foundPriority && target->isVisible() && target != NULL)
 		{
 			(*i)->attack(target);
 		}
