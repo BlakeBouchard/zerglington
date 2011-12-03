@@ -152,11 +152,13 @@ void Striker::updateStrikers(void)
 
 	if (!foundMuster)
 	{
+		Broodwar->sendText("No muster set, setting muster");
 		setMuster();
 	}
 
 	if (!target->isVisible() || target == NULL)
 	{
+		Broodwar->sendText("Can't see target, retargetting");
 		foundPriority = false;
 		setTarget();
 	}
