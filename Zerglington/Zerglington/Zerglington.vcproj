@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\..\Starcraft\bwapi-data\AI"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="D:\Starcraft\bwapi-data\AI\Debug\"
+			IntermediateDirectory="$(ConfigurationName)d"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -91,7 +91,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\..\Starcraft\bwapi-data\AI"
+			OutputDirectory="D:\Starcraft\bwapi-data\AI\"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -184,7 +184,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\Utils.cpp"
+				RelativePath=".\Source\Striker.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Worker.cpp"
 				>
 			</File>
 			<File
@@ -199,6 +203,14 @@
 			>
 			<File
 				RelativePath=".\Source\Scouter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Striker.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Worker.h"
 				>
 			</File>
 			<File
