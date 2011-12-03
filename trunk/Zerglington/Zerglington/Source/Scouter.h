@@ -23,9 +23,12 @@ public:
 	void addZergling(BWAPI::Unit*);
 	void addAllZerglings(void);
 	void dumpZerglings(void);
+	bool isScout(BWAPI::Unit*);
 	void foundBase(BWAPI::TilePosition);
-	void foundUnit(BWAPI::Unit*);
+	void foundBuilding(BWAPI::Unit*);
 	BWAPI::TilePosition getEnemyBase();
+	void scoutKilled(BWAPI::Unit*);
+	void setDestination(BWAPI::Unit*, bool nearest = false);
 	void updateScouts(void);
 
 	BWAPI::TilePosition findFurthestUnscouted(BWAPI::Unit*);

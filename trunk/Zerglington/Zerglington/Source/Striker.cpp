@@ -6,7 +6,7 @@ using namespace std;
 Striker::Striker(void)
 {
 	initialized = false;
-	foundPriority = false;
+	foundMuster = false;
 }
 
 Striker::~Striker(void)
@@ -15,33 +15,39 @@ Striker::~Striker(void)
 
 void Striker::initialize(TilePosition base)
 {
-	addAllZerglings();
 	setEnemyBase(Position(base));
 	setEnemyPlayer();
+	addAllZerglings();
 	initialized = true;
+	Broodwar->sendText("Striker initialized");
 }
 
 void Striker::addZergling(Unit* unit)
 {
-	strikers.push_back(unit);
+	strikers.insert(unit);
 }
 
 void Striker::addAllZerglings(void)
 {
-	strikers.clear();
 	set<Unit*> allUnits = Broodwar->self()->getUnits();
 	for (set<Unit*>::iterator i = allUnits.begin(); i != allUnits.end(); i++)
 	{
-		if ((*i)->getType().getID() == UnitTypes::Zerg_Zergling)
+		if ((*i)->getType().getID() == UnitTypes::Zerg_Zergling && !isStriker(*i))
 		{
-			strikers.push_back(*i);
+			Broodwar->sendText("Found new Zergling");
+			addZergling(*i);
 		}
 	}
 }
 
+bool Striker::isStriker(Unit* unit)
+{
+	return strikers.find(unit) != strikers.end();
+}
+
 Unit* Striker::findNearestToMuster(set<Unit*> enemyUnits)
 {
-	if (enemyUnits.empty())
+	if (!foundMuster || enemyUnits.empty())
 	{
 		return NULL;
 	}
@@ -59,9 +65,28 @@ Unit* Striker::findNearestToMuster(set<Unit*> enemyUnits)
 	return closest;
 }
 
+Unit* Striker::findNearestUnit(Unit* unit, set<Unit*> unitSet)
+{
+	if (unitSet.empty())
+	{
+		return NULL;
+	}
+
+	set<Unit*>::iterator i = unitSet.begin();
+	Unit* closest = *i;
+	for (++i; i != unitSet.end(); i++)
+	{
+		if ((*i)->getDistance(unit) < closest->getDistance(unit))
+		{
+			closest = *i;
+		}
+	}
+}
+
 void Striker::setEnemyBase(Position base)
 {
 	enemyBase = base;
+	targetPosition = enemyBase;
 }
 
 void Striker::setEnemyPlayer()
@@ -79,7 +104,6 @@ void Striker::setEnemyPlayer()
 
 void Striker::setMuster(void)
 {
-	Broodwar->sendText("Setting muster");
 	BWTA::Chokepoint* chokepoint = BWTA::getNearestChokepoint(enemyBase);
 	if (chokepoint != NULL)
 	{
@@ -101,46 +125,115 @@ void Striker::setMuster(void)
 
 void Striker::setTarget(void)
 {
-	Broodwar->sendText("Setting target");
-	set<Unit*> enemyUnits = enemyPlayer->getUnits();
-	if (enemyUnits.empty())
-		return;
+	target = getShownTarget(*strikers.begin());
+	if (target != NULL)
+	{
+		targetPosition = target->getPosition();
+	}
+}
+
+Unit* Striker::getShownTarget(Unit* unit)
+{
+	if (shown.empty())
+	{
+		return NULL;
+	}
 
 	set<Unit*> workers;
 	set<Unit*> attackers;
-	bool foundWorker = false;
-	bool foundAttacker = false;
+	set<Unit*> baseDefense;
+	set<Unit*> benign;
 
-	for (set<Unit*>::iterator i = enemyUnits.begin(); i != enemyUnits.end(); i++)
+	for (set<Unit*>::iterator i = shown.begin(); i != shown.end(); i++)
 	{
-		if ((*i)->getType().isWorker())
+		UnitType type = (*i)->getType();
+		if (type.isWorker())
 		{
-			workers.insert((*i));
-			foundWorker = true;
-		} 
-		else if (!foundWorker && (*i)->getType().canAttack())
+			workers.insert(*i);
+		}
+		else if (type.canAttack())
 		{
-			attackers.insert((*i));
-			foundAttacker = true;
+			if (type.isBuilding())
+			{
+				baseDefense.insert(*i);
+			}
+			else
+			{
+				attackers.insert(*i);
+			}
+		}
+		else
+		{
+			benign.insert(*i);
 		}
 	}
 
-	if (foundWorker)
+	if (!workers.empty())
 	{
-		target = findNearestToMuster(workers);
-		foundPriority = true;
+		return findNearestUnit(unit, workers);
+	} 
+	else if (!attackers.empty())
+	{
+		return findNearestUnit(unit, attackers);
 	}
-	else if (foundAttacker)
+	else if (!baseDefense.empty())
 	{
-		target = findNearestToMuster(attackers);
-		foundPriority = true;
+		return findNearestUnit(unit, baseDefense);
+	}
+	else if (!benign.empty())
+	{
+		return findNearestUnit(unit, benign);
 	}
 	else
 	{
-		target = findNearestToMuster(enemyUnits);
+		return NULL;
+	}
+}
+
+void Striker::unitDiscovered(BWAPI::Unit* unit)
+{
+	unitShown(unit);
+}
+
+void Striker::unitKilled(BWAPI::Unit* unit)
+{
+	if (isStriker(unit))
+	{
+		strikers.erase(unit);
+		return;
+	}
+	else
+	{
+		if (unit == target)
+		{
+			target = NULL;
+		}
+
+		shown.erase(unit);
+	}
+}
+
+void Striker::unitHidden(BWAPI::Unit* unit)
+{
+	if (unit->getType().isFlyer())
+	{
+		return;
 	}
 
-	Broodwar->sendText("Set target successfully");
+	shown.erase(unit);
+}
+
+void Striker::unitShown(BWAPI::Unit* unit)
+{	
+	if (unit->getType().isFlyer())
+	{
+		return;
+	}
+
+	if (shown.find(unit) == shown.end())
+	{
+		shown.insert(unit);
+	}
 }
 
 void Striker::updateStrikers(void)
@@ -150,28 +243,35 @@ void Striker::updateStrikers(void)
 		return;
 	}
 
-	if (!foundMuster)
+	if (!foundMuster && false)
 	{
-		Broodwar->sendText("No muster set, setting muster");
+		Broodwar->sendText("No muster set");
 		setMuster();
 	}
 
-	if (!target->isVisible() || target == NULL)
+	if (target == NULL)
 	{
-		Broodwar->sendText("Can't see target, retargetting");
-		foundPriority = false;
 		setTarget();
 	}
 
-	for (vector<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
+	if (target != NULL)
 	{
-		if (foundPriority && target->isVisible() && target != NULL)
+		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
 			(*i)->attack(target);
 		}
-		else
+	}
+	else
+	{
+		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
-			(*i)->attack(enemyBase);
+			(*i)->attack(targetPosition);
 		}
 	}
+}
+
+// Private member functions
+bool Striker::isVisible(Unit* unit)
+{
+	return shown.find(unit) != shown.end();
 }

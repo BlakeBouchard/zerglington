@@ -1,7 +1,6 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
-#include <set>
 
 class Striker
 {
@@ -12,23 +11,34 @@ public:
 	void initialize(BWAPI::TilePosition);
 	void addZergling(BWAPI::Unit*);
 	void addAllZerglings(void);
+	bool isStriker(BWAPI::Unit*);
 	BWAPI::Unit* findNearestToMuster(std::set<BWAPI::Unit*>);
+	BWAPI::Unit* findNearestUnit(BWAPI::Unit*, std::set<BWAPI::Unit*>);
 	void setEnemyBase(BWAPI::Position);
 	void setEnemyPlayer(void);
 	void setMuster(void);
 	void setTarget(void);
+	BWAPI::Unit* getShownTarget(BWAPI::Unit*);
+	void unitDiscovered(BWAPI::Unit* unit);
+	void unitKilled(BWAPI::Unit* unit);
+	void unitHidden(BWAPI::Unit* unit);
+	void unitShown(BWAPI::Unit* unit);
 	void updateStrikers(void);
 
 	bool initialized;
 
 private:
 
-	std::vector<BWAPI::Unit*> strikers;
+	
 	BWAPI::Position enemyBase;
 	BWAPI::Player* enemyPlayer;
-	
-	bool foundPriority;
 	BWAPI::Unit* target;
+	BWAPI::Position targetPosition;
+	
+	std::set<BWAPI::Unit*> strikers;
+	std::set<BWAPI::Unit*> shown;
+
+	bool isVisible(BWAPI::Unit* unit);
 
 	bool foundMuster;
 	BWAPI::Position muster;
