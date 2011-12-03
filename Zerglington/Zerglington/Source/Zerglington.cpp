@@ -124,23 +124,39 @@ void Zerglington::onNukeDetect(BWAPI::Position target){
 }
 
 void Zerglington::onUnitDiscover(BWAPI::Unit* unit){
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		scouter.foundUnit(unit); // Scouter will decide what to do
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1 && unit->getPlayer()->isEnemy(Broodwar->self()))
+	{
+		if (!foundEnemyBase && unit->getType().isBuilding())
+		{
+			// Let Scouter deal with it
+			scouter.foundBuilding(unit);
+		}
+		striker.unitDiscovered(unit);
+	}
 	//Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitEvade(BWAPI::Unit* unit){
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1 && unit->getPlayer()->isEnemy(Broodwar->self()))
+	{
+		striker.unitHidden(unit);
+	}
 	//Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitShow(BWAPI::Unit* unit){
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1 && unit->getPlayer()->isEnemy(Broodwar->self()))
+	{
+		striker.unitShown(unit);
+	}
 	//Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void Zerglington::onUnitHide(BWAPI::Unit* unit){
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1);
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1 && unit->getPlayer()->isEnemy(Broodwar->self()))
+	{
+		striker.unitHidden(unit);
+	}
 	//Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
@@ -178,8 +194,21 @@ void Zerglington::onUnitDestroy(BWAPI::Unit* unit){
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1){
 		Broodwar->sendText("A %s [%x] has been destroyed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 		//If unit was our drone, remove it from our set
-		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0 && unit->getPlayer() == Broodwar->self()){
-			workerManager.removeWorker(unit);
+		
+		if (unit->getPlayer() == Broodwar->self())
+		{
+			if (unit->getType().getID() == UnitTypes::Zerg_Drone)
+			{
+				workerManager.removeWorker(unit);
+			}
+			if (scouter.isScout(unit))
+			{
+				scouter.scoutKilled(unit);
+			}
+		}
+		else if (unit->getPlayer()->isEnemy(Broodwar->self()) || striker.isStriker(unit))
+		{
+			striker.unitKilled(unit);
 		}
 	}
 }
