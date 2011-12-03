@@ -71,7 +71,7 @@ void Zerglington::onFrame(){
 	//Manage larva
 	workerManager.larvaMorphing(); //Creates drones/zerglings/overlords
 
-	workerManager.manageWorkers();
+	workerManager.manageWorkers(); //Send workers out to do their jobs
 
 	if (Broodwar->getFrameCount()%30==0){
 		// Update Scouts
