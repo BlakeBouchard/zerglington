@@ -126,6 +126,10 @@ void Striker::setMuster(void)
 
 void Striker::setTarget(void)
 {
+	if (strikers.empty())
+	{
+		return;
+	}
 	target = getShownTarget(*strikers.begin());
 	if (target != NULL)
 	{
@@ -169,11 +173,7 @@ Unit* Striker::getShownTarget(Unit* unit)
 		}
 	}
 
-	if (!workers.empty())
-	{
-		return findNearestUnit(unit, workers);
-	} 
-	else if (!attackers.empty())
+	if (!attackers.empty())
 	{
 		return findNearestUnit(unit, attackers);
 	}
@@ -181,6 +181,10 @@ Unit* Striker::getShownTarget(Unit* unit)
 	{
 		return findNearestUnit(unit, baseDefense);
 	}
+	else if (!workers.empty())
+	{
+		return findNearestUnit(unit, workers);
+	} 
 	else if (!benign.empty())
 	{
 		return findNearestUnit(unit, benign);
@@ -201,16 +205,15 @@ void Striker::unitKilled(BWAPI::Unit* unit)
 	if (isStriker(unit))
 	{
 		strikers.erase(unit);
-		return;
 	}
 	else
 	{
+		shown.erase(unit);
 		if (unit == target)
 		{
 			target = NULL;
+			setTarget();
 		}
-
-		shown.erase(unit);
 	}
 }
 
@@ -219,6 +222,11 @@ void Striker::unitHidden(BWAPI::Unit* unit)
 	if (unit->getType().isFlyer())
 	{
 		return;
+	}
+
+	if (unit == target)
+	{
+		target = NULL;
 	}
 
 	shown.erase(unit);
@@ -235,6 +243,11 @@ void Striker::unitShown(BWAPI::Unit* unit)
 	{
 		shown.insert(unit);
 	}
+
+	if (target == NULL)
+	{
+		target = unit;
+	}
 }
 
 void Striker::updateStrikers(void)
@@ -244,7 +257,7 @@ void Striker::updateStrikers(void)
 		return;
 	}
 
-	if (!foundMuster && false)
+	if (!foundMuster)
 	{
 		Broodwar->sendText("No muster set");
 		setMuster();
@@ -259,6 +272,8 @@ void Striker::updateStrikers(void)
 	{
 		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
+			if ((*i)->isUnderAttack())
+				setTarget();
 			(*i)->attack(target);
 		}
 	}
