@@ -7,6 +7,7 @@ Striker::Striker(void)
 {
 	initialized = false;
 	foundMuster = false;
+	noMoreUnits = false;
 }
 
 Striker::~Striker(void)
@@ -210,8 +211,8 @@ void Striker::unitKilled(BWAPI::Unit* unit)
 	{
 		target = NULL;
 		shown.erase(unit);
-		setTarget();
 	}
+	setTarget();
 }
 
 void Striker::unitHidden(BWAPI::Unit* unit)
@@ -221,12 +222,14 @@ void Striker::unitHidden(BWAPI::Unit* unit)
 		return;
 	}
 
+	shown.erase(unit);
+	hidden.push(unit->getPosition());
+
 	if (unit == target)
 	{
 		target = NULL;
+		setTarget();
 	}
-
-	shown.erase(unit);
 }
 
 void Striker::unitShown(BWAPI::Unit* unit)
@@ -241,10 +244,7 @@ void Striker::unitShown(BWAPI::Unit* unit)
 		shown.insert(unit);
 	}
 
-	if (target == NULL)
-	{
-		target = unit;
-	}
+	setTarget();
 }
 
 void Striker::updateStrikers(void)
@@ -276,10 +276,20 @@ void Striker::updateStrikers(void)
 	}
 	else
 	{
+		if (Broodwar->isVisible(TilePosition(targetPosition)))
+		{
+			targetPosition = hidden.front();
+			hidden.pop();
+		}
 		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
 			(*i)->attack(targetPosition);
 		}
+	}
+
+	if (target == NULL && shown.empty() && hidden.empty())
+	{
+		noMoreUnits = true;
 	}
 }
 

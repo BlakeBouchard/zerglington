@@ -9,7 +9,6 @@ BWTA::Region* enemy_base;
 void Zerglington::onStart(){
 	Broodwar->sendText("Zerglington:");
 	Broodwar->sendText("Blake Bouchard and Teri Drummond");
-	//Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
 	// Enable some cheat flags
 	//Broodwar->enableFlag(Flag::UserInput);
 	// Uncomment to enable complete map information
@@ -36,6 +35,8 @@ void Zerglington::onStart(){
 		Broodwar->printf("The match up is %s v %s",
 			Broodwar->self()->getRace().getName().c_str(),
 			Broodwar->enemy()->getRace().getName().c_str());
+
+		Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
 
 		//Iterate through all units at game start
 		for(std::set<Unit*>::const_iterator i=Broodwar->self()->getUnits().begin();i!=Broodwar->self()->getUnits().end();i++){
