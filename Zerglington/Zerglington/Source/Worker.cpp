@@ -160,7 +160,7 @@ void WorkerManager::checkHatchery2(){
 //Determines whether we need to morph an overlord based on the current control (supply) ratio
 bool WorkerManager::needOverlord(){
 	double ratio = Broodwar->self()->supplyUsed() / Broodwar->self()->supplyTotal();
-	if( ratio >= 0.9)
+	if( ratio >= 0.8)
 		return true;
 	return false;
 }
@@ -187,18 +187,17 @@ void WorkerManager::larvaMorphing(){
 			larva->morph(UnitTypes::Zerg_Overlord);
 			morphQ.pop(); //Remove this task from the queue
 		}
-		else if(morphQ.front() == LING && hasSpawningPool && needOverlord() && Broodwar->canMake(NULL, UnitTypes::Zerg_Overlord)){
-			//Case 3a: We want zerglings, we have a spawning pool, but we need more overlords to increase control
+		else if(morphQ.front() == LING && Broodwar->canMake(NULL, UnitTypes::Zerg_Zergling)){
+			//Case 3a: Next in morph queue is a zergling. This means that it's time to pump out zerglings nonstop
+			Unit* larva = getOneLarva();
+			larva->morph(UnitTypes::Zerg_Zergling);
+			//We no longer pop the task from the queue because we want to keep making zerglings
+		}else if(morphQ.front() == LING && hasSpawningPool && Broodwar->canMake(NULL, UnitTypes::Zerg_Overlord)){
+			//Case 3b: We want zerglings, we have a spawning pool, but we need more overlords to increase control
 			//Get the hatchery, then get the larva to morph into an overlord
 			Unit* larva = getOneLarva();
 			larva->morph(UnitTypes::Zerg_Overlord);
 			//We do not pop a task from the queue because we want to continue making zerglings or overlords when necessary
-		}
-		else if(morphQ.front() == LING && Broodwar->canMake(NULL, UnitTypes::Zerg_Zergling)){
-			//Case 3b: Next in morph queue is a zergling. This means that it's time to pump out zerglings nonstop
-			Unit* larva = getOneLarva();
-			larva->morph(UnitTypes::Zerg_Zergling);
-			//We no longer pop the task from the queue because we want to keep making zerglings
 		}
 	}
 }
