@@ -81,6 +81,8 @@ Unit* Striker::findNearestUnit(Unit* unit, set<Unit*> unitSet)
 			closest = *i;
 		}
 	}
+
+	return closest;
 }
 
 void Striker::setEnemyBase(Position base)
