@@ -79,7 +79,7 @@ void Zerglington::onFrame(){
 		// Update Scouts
 		scouter.updateScouts();
 	}
-	if (foundEnemyBase && Broodwar->getFrameCount()%15==0){
+	if (foundEnemyBase){
 		if (!striker.initialized)
 		{
 			striker.initialize(scouter.getEnemyBase());

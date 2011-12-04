@@ -141,7 +141,7 @@ void Striker::setTarget(void)
 
 Unit* Striker::getShownTarget(Unit* unit)
 {
-	if (shown.empty() || unit == NULL)
+	if (shown.empty())
 	{
 		return NULL;
 	}

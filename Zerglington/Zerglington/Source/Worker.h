@@ -3,7 +3,7 @@
 #include <queue>
 #include <map>
 
-enum job{IDLE, MINERALS, GAS, MORPH};
+enum job{IDLE, MINERALS, GAS, MORPHPOOL, MORPHHATCHERY};
 enum morph{DRONE, POOL, LORD, LING};
 
 //Class Worker keeps track of useful aspects of a drone
@@ -31,13 +31,8 @@ private:
 //morphing larva into the most needed unit types
 class WorkerManager{
 public:
-	WorkerManager(){
-		initBuildOrder(); //Initialize the build order
-		posBuild = getBuildLoc(); //Determine where the spawning pool should be placed
-		hasSpawningPool = false;
-		isMorphingSpawningPool = false;
-	}
-	~WorkerManager(){ workers.clear(); }
+	WorkerManager();
+	~WorkerManager();
 
 	void addWorker(BWAPI::Unit* w);
 	void removeWorker(BWAPI::Unit* w);
@@ -50,25 +45,33 @@ public:
 	//Carry out the jobs assigned to each worker
 	void manageWorkers();
 	void sendWorkerMine(Worker* w);
-	void sendWorkerMorph(Worker* w);
+	void sendWorkerMorphPool(Worker* w);
+	void sendWorkerMorphHatchery(Worker* w);
 
 	//Utilities for managing larva and workers:
 
 	//Initialize the build order for a six-pool rush
 	void initBuildOrder();
 	//Finds a place to build (morph) a spawning pool
-	BWAPI::TilePosition getBuildLoc();
+	BWAPI::TilePosition getBuildLocPool();
+	//Finds a place to build (morph) a hatchery
+	BWAPI::TilePosition getBuildLocHatchery();
 	//Finds the closest mineral patch to a given unit
 	BWAPI::Unit* findClosestMineral(BWAPI::Unit* unit);
 	//Checks whether a building spawning pool is finished
 	void checkSpawningPool();
+	//Checks whether a building hatchery is finished
+	void checkHatchery2();
 	//Finds one larva and returns a pointer to it
 	BWAPI::Unit* getOneLarva();
+	//Determine whether we need to morph another overlord
+	bool needOverlord();
 
 	std::map<int, Worker*> workers; //Map organizing all drone units, keyed by their ID
 	std::queue<int> morphQ; //Queue of what needs to be morphed. Must correspond to enum morph
 
-	BWAPI::TilePosition posBuild; //The tile position where we will build our spawning pool
 	bool hasSpawningPool;
 	bool isMorphingSpawningPool;
+	bool hasHatchery2;
+	bool isMorphingHatchery2;
 };
