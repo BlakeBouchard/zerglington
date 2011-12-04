@@ -30,12 +30,12 @@ void Striker::addZergling(Unit* unit)
 
 void Striker::addAllZerglings(void)
 {
+	strikers.clear();
 	set<Unit*> allUnits = Broodwar->self()->getUnits();
 	for (set<Unit*>::iterator i = allUnits.begin(); i != allUnits.end(); i++)
 	{
-		if ((*i)->getType().getID() == UnitTypes::Zerg_Zergling && !isStriker(*i))
+		if ((*i)->getType().getID() == UnitTypes::Zerg_Zergling)
 		{
-			Broodwar->sendText("Found new Zergling");
 			addZergling(*i);
 		}
 	}
@@ -279,8 +279,12 @@ void Striker::updateStrikers(void)
 	{
 		if (Broodwar->isVisible(TilePosition(targetPosition)))
 		{
-			targetPosition = hidden.front();
-			hidden.pop();
+			setTarget();
+			if (!hidden.empty())
+			{
+				targetPosition = hidden.front();
+				hidden.pop();
+			}
 		}
 		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
