@@ -18,7 +18,7 @@ void Striker::initialize(TilePosition base)
 {
 	setEnemyBase(Position(base));
 	addAllZerglings();
-	//noMoreUnits = false;
+	noMoreUnits = false;
 	initialized = true;
 	Broodwar->sendText("Striker initialized");
 }
@@ -132,9 +132,12 @@ void Striker::setTarget(void)
 	{
 		return;
 	}
+
 	target = getShownTarget(*strikers.begin());
+
 	if (target != NULL)
 	{
+		hidden.push(targetPosition);
 		targetPosition = target->getPosition();
 	}
 }
@@ -197,6 +200,29 @@ Unit* Striker::getShownTarget(Unit* unit)
 	}
 }
 
+void Striker::checkAllTargets(void)
+{
+	Broodwar->sendText("Checking all targets");
+	set<Unit*> allUnits = Broodwar->getAllUnits();
+	for (set<Unit*>::iterator i = allUnits.begin(); i != allUnits.end(); i++)
+	{
+		if ((*i)->getPlayer()->isEnemy(Broodwar->self()) && !(*i)->getType().isFlyer())
+		{
+			shown.insert(*i);
+		}
+	}
+
+	if (shown.empty() && hidden.empty() && target == NULL)
+	{
+		initialized = false;
+		noMoreUnits = true;
+	}
+	else
+	{
+		setTarget();
+	}
+}
+
 void Striker::unitDiscovered(BWAPI::Unit* unit)
 {
 	unitShown(unit);
@@ -218,6 +244,7 @@ void Striker::unitKilled(BWAPI::Unit* unit)
 
 void Striker::unitHidden(BWAPI::Unit* unit)
 {
+	Broodwar->sendText("Unit hidden");
 	if (unit->getType().isFlyer())
 	{
 		return;
@@ -248,6 +275,51 @@ void Striker::unitShown(BWAPI::Unit* unit)
 	setTarget();
 }
 
+void Striker::attackTarget(void)
+{
+	for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
+	{
+		if (!(*i)->isAttacking() && !(*i)->isMoving())
+		{
+			if ((*i)->isUnderAttack() && !target->getType().canAttack())
+			{
+				setTarget();
+			}
+			(*i)->attack(target);
+		}
+	}
+}
+
+void Striker::attackPosition(void)
+{
+	set<Unit*> tileUnits = Broodwar->getUnitsOnTile(targetPosition.x(), targetPosition.y());
+	if (Broodwar->isVisible(TilePosition(targetPosition)))
+	{
+		for (set<Unit*>::iterator i = tileUnits.begin(); i != tileUnits.end(); i++)
+		{
+			if (!(*i)->getPlayer()->isEnemy(Broodwar->self()))
+				tileUnits.erase(i);
+		}
+		if (tileUnits.empty() && !hidden.empty())
+		{
+			targetPosition = hidden.front();
+			hidden.pop();
+		}
+		else
+		{
+			setTarget();
+		}
+	}
+	else
+	{
+		Broodwar->sendText("Attacking target position");
+		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
+		{
+			(*i)->attack(targetPosition);
+		}
+	}
+}
+
 void Striker::updateStrikers(void)
 {
 	if (!initialized || strikers.empty())
@@ -255,46 +327,24 @@ void Striker::updateStrikers(void)
 		return;
 	}
 
-	if (!foundMuster)
+	if (false && !foundMuster)
 	{
 		Broodwar->sendText("No muster set");
 		setMuster();
 	}
 
+	if (shown.empty() && hidden.empty())
+	{
+		checkAllTargets();
+	}
+
 	if (target == NULL)
 	{
-		setTarget();
-	}
-
-	if (target != NULL)
-	{
-		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
-		{
-			if ((*i)->isUnderAttack() && target->getType().canAttack())
-			{
-				setTarget();
-			}
-			(*i)->attack(target);
-		}
-	}
+		attackPosition();
+	} 
 	else
 	{
-		if (Broodwar->isVisible(TilePosition(targetPosition)) && !hidden.empty())
-		{
-			setTarget();
-			targetPosition = hidden.front();
-			hidden.pop();
-		}
-		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
-		{
-			(*i)->attack(targetPosition);
-		}
-	}
-
-	if (false && target == NULL && shown.empty() && hidden.empty())
-	{
-		noMoreUnits = true;
-		initialized = false;
+		attackTarget();
 	}
 }
 

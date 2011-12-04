@@ -18,17 +18,20 @@ public:
 	~Scouter(void);
 
 	void initialize(void);
-	void setUnscouted(void);
+	void resetScouter(void);
+	
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
 	void addAllZerglings(void);
 	void dumpZerglings(void);
+
 	bool isScout(BWAPI::Unit*);
+	BWAPI::TilePosition getEnemyBase();
+
 	void foundBase(BWAPI::TilePosition);
 	void foundBuilding(BWAPI::Unit*);
-	BWAPI::TilePosition getEnemyBase();
 	void scoutKilled(BWAPI::Unit*);
-	void setDestination(BWAPI::Unit*, bool nearest = false);
+	
 	void updateScouts(void);
 
 	BWAPI::TilePosition findFurthestUnscouted(BWAPI::Unit*);
@@ -38,6 +41,9 @@ public:
 	BWAPI::TilePosition homeBase;
 
 private:
+	void setDestination(BWAPI::Unit*, bool nearest = false);
+	void setUnscouted(void);
+
 	typedef std::set<BWAPI::TilePosition> TileSet;
 	typedef std::map<BWAPI::Unit*, BWAPI::TilePosition> ScoutMap;
 	typedef std::pair<BWAPI::Unit*, BWAPI::TilePosition> ScoutPair;
