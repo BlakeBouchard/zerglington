@@ -18,6 +18,7 @@ public:
 	~Scouter(void);
 
 	void initialize(void);
+	void setUnscouted(void);
 	void addOverlord(BWAPI::Unit*);
 	void addZergling(BWAPI::Unit*);
 	void addAllZerglings(void);

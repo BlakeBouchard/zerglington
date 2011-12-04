@@ -17,10 +17,15 @@ Scouter::~Scouter(void)
 void Scouter::initialize(void)
 {
 	startLocations	= Broodwar->getStartLocations();
-	unscouted		= Broodwar->getStartLocations();
 	homeBase = Broodwar->self()->getStartLocation();
-	unscouted.erase(homeBase);
+	setUnscouted();
 	Broodwar->sendText("Scouter Initialized");
+}
+
+void Scouter::setUnscouted(void)
+{
+	unscouted = Broodwar->getStartLocations();
+	unscouted.erase(homeBase);
 }
 
 void Scouter::addOverlord(Unit* overlord)
