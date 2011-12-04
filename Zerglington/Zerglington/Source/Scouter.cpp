@@ -80,10 +80,10 @@ TilePosition Scouter::findFurthestUnscouted(Unit* unit)
 	if (unscouted.empty())
 		return homeBase;
 	
-	TilePosition furthest = *startLocations.begin();
+	TilePosition furthest = *unscouted.begin();
 	TilePosition unitPosition = unit->getTilePosition();
 	
-	for (TileSet::iterator i = startLocations.begin(); i != startLocations.end(); i++)
+	for (TileSet::iterator i = unscouted.begin(); i != unscouted.end(); i++)
 	{
 		if ((*i).getDistance(unitPosition) > furthest.getDistance(unitPosition))
 		{
@@ -99,10 +99,10 @@ TilePosition Scouter::findNearestUnscouted(Unit* unit)
 	if (unscouted.empty())
 		return homeBase;
 	
-	TilePosition closest = *startLocations.begin();
+	TilePosition closest = *unscouted.begin();
 	TilePosition unitPosition = unit->getTilePosition();
 	
-	for (TileSet::iterator i = startLocations.begin(); i != startLocations.end(); i++)
+	for (TileSet::iterator i = unscouted.begin(); i != unscouted.end(); i++)
 	{
 		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
 		{
@@ -174,8 +174,7 @@ void Scouter::setDestination(Unit* unit, bool nearest)
 
 	if (destination == homeBase)
 	{
-		if (scout != scouts.end())
-			scouts.erase(scout);
+		scouts.erase(scout);
 	}
 	else
 	{
