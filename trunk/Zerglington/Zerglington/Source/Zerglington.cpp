@@ -85,6 +85,12 @@ void Zerglington::onFrame(){
 		}
 		// Update Strikers
 		striker.updateStrikers();
+
+		if (striker.noMoreUnits)
+		{
+			foundEnemyBase = false;
+			scouter.setUnscouted();
+		}
 	}
 	if (analyzed)
 		drawTerrainData();
