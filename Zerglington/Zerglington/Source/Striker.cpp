@@ -208,12 +208,9 @@ void Striker::unitKilled(BWAPI::Unit* unit)
 	}
 	else
 	{
+		target = NULL;
 		shown.erase(unit);
-		if (unit == target)
-		{
-			target = NULL;
-			setTarget();
-		}
+		setTarget();
 	}
 }
 

@@ -215,7 +215,7 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 
 		if (unit->getType().getID() == UnitTypes::Zerg_Overlord)
 		{
-			scouter.addOverlord(unit);
+			//scouter.addOverlord(unit);
 		}
 		else if (unit->getType().getID() == UnitTypes::Zerg_Zergling)
 		{
