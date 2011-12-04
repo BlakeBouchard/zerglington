@@ -9,6 +9,7 @@ BWTA::Region* enemy_base;
 void Zerglington::onStart(){
 	Broodwar->sendText("Zerglington:");
 	Broodwar->sendText("Blake Bouchard and Teri Drummond");
+	Broodwar->setLocalSpeed(8);
 	// Enable some cheat flags
 	//Broodwar->enableFlag(Flag::UserInput);
 	// Uncomment to enable complete map information
