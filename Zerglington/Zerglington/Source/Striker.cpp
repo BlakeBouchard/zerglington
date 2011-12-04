@@ -18,6 +18,7 @@ void Striker::initialize(TilePosition base)
 {
 	setEnemyBase(Position(base));
 	addAllZerglings();
+	//noMoreUnits = false;
 	initialized = true;
 	Broodwar->sendText("Striker initialized");
 }
@@ -287,9 +288,10 @@ void Striker::updateStrikers(void)
 		}
 	}
 
-	if (target == NULL && shown.empty() && hidden.empty())
+	if (false && target == NULL && shown.empty() && hidden.empty())
 	{
 		noMoreUnits = true;
+		initialized = false;
 	}
 }
 

@@ -26,6 +26,7 @@ void Scouter::setUnscouted(void)
 {
 	unscouted = Broodwar->getStartLocations();
 	unscouted.erase(homeBase);
+	addAllZerglings();
 }
 
 void Scouter::addOverlord(Unit* overlord)
