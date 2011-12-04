@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
+#include <queue>
 
 class Striker
 {
@@ -26,6 +27,7 @@ public:
 	void updateStrikers(void);
 
 	bool initialized;
+	bool noMoreUnits;
 
 private:
 
@@ -37,6 +39,7 @@ private:
 	
 	std::set<BWAPI::Unit*> strikers;
 	std::set<BWAPI::Unit*> shown;
+	std::queue<BWAPI::Position> hidden;
 
 	bool isVisible(BWAPI::Unit* unit);
 
