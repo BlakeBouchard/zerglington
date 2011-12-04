@@ -19,7 +19,7 @@ public:
 	void setEnemyPlayer(void);
 	void setMuster(void);
 	void setTarget(void);
-	BWAPI::Unit* getShownTarget(BWAPI::Unit*);
+	BWAPI::Unit* getShownTarget(BWAPI::Unit* unit);
 	void unitDiscovered(BWAPI::Unit* unit);
 	void unitKilled(BWAPI::Unit* unit);
 	void unitHidden(BWAPI::Unit* unit);
