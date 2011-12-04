@@ -9,7 +9,7 @@ BWTA::Region* enemy_base;
 void Zerglington::onStart(){
 	Broodwar->sendText("Zerglington:");
 	Broodwar->sendText("Blake Bouchard and Teri Drummond");
-	Broodwar->setLocalSpeed(8);
+	Broodwar->setLocalSpeed(0);
 	// Enable some cheat flags
 	//Broodwar->enableFlag(Flag::UserInput);
 	// Uncomment to enable complete map information
@@ -90,7 +90,7 @@ void Zerglington::onFrame(){
 		if (striker.noMoreUnits)
 		{
 			foundEnemyBase = false;
-			scouter.setUnscouted();
+			scouter.resetScouter();
 		}
 	}
 	if (analyzed)

@@ -16,17 +16,23 @@ Scouter::~Scouter(void)
 
 void Scouter::initialize(void)
 {
+	// Get all start locations and then 
 	startLocations	= Broodwar->getStartLocations();
 	homeBase = Broodwar->self()->getStartLocation();
 	setUnscouted();
 	Broodwar->sendText("Scouter Initialized");
 }
 
+void Scouter::resetScouter(void)
+{
+	setUnscouted();
+	addAllZerglings();
+}
+
 void Scouter::setUnscouted(void)
 {
 	unscouted = Broodwar->getStartLocations();
 	unscouted.erase(homeBase);
-	addAllZerglings();
 }
 
 void Scouter::addOverlord(Unit* overlord)
@@ -133,6 +139,7 @@ TilePosition Scouter::findNearestStart(Unit* unit)
 void Scouter::foundBase(TilePosition basePosition)
 {
 	enemyBase = basePosition;
+	dumpZerglings();
 	foundEnemyBase = true;
 	Broodwar->sendText("Found enemy base");
 }
@@ -196,6 +203,11 @@ void Scouter::updateScouts(void)
 {
 	if (!foundEnemyBase)
 	{
+		if (unscouted.empty() && scouts.empty())
+		{
+			resetScouter();
+		}
+
 		if (unscouted.empty() && scouts.size() == 1)
 		{
 			foundBase(scouts.begin()->second);

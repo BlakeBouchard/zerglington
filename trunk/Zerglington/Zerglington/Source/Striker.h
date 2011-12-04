@@ -12,6 +12,8 @@ public:
 	void initialize(BWAPI::TilePosition);
 	void addZergling(BWAPI::Unit*);
 	void addAllZerglings(void);
+	void attackTarget(void);
+	void attackPosition(void);
 	bool isStriker(BWAPI::Unit*);
 	BWAPI::Unit* findNearestToMuster(std::set<BWAPI::Unit*>);
 	BWAPI::Unit* findNearestUnit(BWAPI::Unit*, std::set<BWAPI::Unit*>);
@@ -20,6 +22,7 @@ public:
 	void setMuster(void);
 	void setTarget(void);
 	BWAPI::Unit* getShownTarget(BWAPI::Unit* unit);
+	void checkAllTargets(void);
 	void unitDiscovered(BWAPI::Unit* unit);
 	void unitKilled(BWAPI::Unit* unit);
 	void unitHidden(BWAPI::Unit* unit);
