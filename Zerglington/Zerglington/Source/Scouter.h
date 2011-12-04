@@ -14,7 +14,6 @@ extern bool foundEnemyBase;
 class Scouter
 {
 public:
-
 	Scouter(void);
 	~Scouter(void);
 
