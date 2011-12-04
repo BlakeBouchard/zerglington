@@ -240,7 +240,7 @@ void Striker::unitShown(BWAPI::Unit* unit)
 		return;
 	}
 
-	if (shown.find(unit) == shown.end())
+	if (shown.find(unit) == shown.end() && unit->getPlayer()->isEnemy(Broodwar->self()))
 	{
 		shown.insert(unit);
 	}
@@ -270,8 +270,10 @@ void Striker::updateStrikers(void)
 	{
 		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
-			if ((*i)->isUnderAttack())
+			if ((*i)->isUnderAttack() && target->getType().canAttack())
+			{
 				setTarget();
+			}
 			(*i)->attack(target);
 		}
 	}
