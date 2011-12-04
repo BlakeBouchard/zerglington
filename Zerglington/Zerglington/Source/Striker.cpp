@@ -277,14 +277,11 @@ void Striker::updateStrikers(void)
 	}
 	else
 	{
-		if (Broodwar->isVisible(TilePosition(targetPosition)))
+		if (Broodwar->isVisible(TilePosition(targetPosition)) && !hidden.empty())
 		{
 			setTarget();
-			if (!hidden.empty())
-			{
-				targetPosition = hidden.front();
-				hidden.pop();
-			}
+			targetPosition = hidden.front();
+			hidden.pop();
 		}
 		for (set<Unit*>::iterator i = strikers.begin(); i != strikers.end(); i++)
 		{
