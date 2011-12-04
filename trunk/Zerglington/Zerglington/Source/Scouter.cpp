@@ -16,16 +16,11 @@ Scouter::~Scouter(void)
 
 void Scouter::initialize(void)
 {
-	Broodwar->sendText("Initializing Scouter");
 	startLocations	= Broodwar->getStartLocations();
 	unscouted		= Broodwar->getStartLocations();
 	homeBase = Broodwar->self()->getStartLocation();
 	unscouted.erase(homeBase);
-	if (unscouted.size() == 1)
-	{
-		Broodwar->sendText("Only one base");
-		foundBase(*unscouted.begin());
-	}
+	Broodwar->sendText("Scouter Initialized");
 }
 
 void Scouter::addOverlord(Unit* overlord)
@@ -195,6 +190,11 @@ void Scouter::updateScouts(void)
 {
 	if (!foundEnemyBase)
 	{
+		if (unscouted.empty() && scouts.size() == 1)
+		{
+			foundBase(scouts.begin()->second);
+		}
+
 		for (ScoutMap::iterator i = scouts.begin(); i != scouts.end(); i++)
 		{
 			Unit* scout = i->first;
