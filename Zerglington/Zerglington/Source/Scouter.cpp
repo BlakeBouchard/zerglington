@@ -115,7 +115,7 @@ TilePosition Scouter::findNearestStart(Unit* unit)
 	
 	for (TileSet::iterator i = startLocations.begin(); i != startLocations.end(); i++)
 	{
-		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition) || closest == homeBase)
+		if ((*i).getDistance(unitPosition) < closest.getDistance(unitPosition))
 		{
 			closest = (*i);
 		}

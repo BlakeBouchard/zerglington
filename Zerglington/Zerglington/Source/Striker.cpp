@@ -16,7 +16,6 @@ Striker::~Striker(void)
 void Striker::initialize(TilePosition base)
 {
 	setEnemyBase(Position(base));
-	setEnemyPlayer();
 	addAllZerglings();
 	initialized = true;
 	Broodwar->sendText("Striker initialized");
@@ -240,7 +239,7 @@ void Striker::unitShown(BWAPI::Unit* unit)
 
 void Striker::updateStrikers(void)
 {
-	if (!initialized)
+	if (!initialized || strikers.empty())
 	{
 		return;
 	}
