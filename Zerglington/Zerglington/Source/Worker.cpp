@@ -100,10 +100,7 @@ void WorkerManager::sendWorkerMine(Worker* worker){
 //Sends a drone to morph into a spawning pool
 void WorkerManager::sendWorkerMorphPool(Worker* worker){
 	TilePosition pos = getBuildLocPool();
-	bool temp = worker->getUnit()->build(pos, UnitTypes::Zerg_Spawning_Pool);
-	Broodwar->sendText("%s tries to be spawning pool at %d %d, result is %d",
-		worker->getUnit()->getType().getName().c_str(),
-		pos.x(), pos.y(), temp);
+	worker->getUnit()->build(pos, UnitTypes::Zerg_Spawning_Pool);
 	if(worker->getUnit()->isMorphing()){
 		morphQ.pop(); //Remove this task from the queue
 		workers.erase(worker->getUnit()->getID()); //Remove this worker from the queue so we don't mess with him
@@ -113,10 +110,7 @@ void WorkerManager::sendWorkerMorphPool(Worker* worker){
 //Sends a drone to morph into a hatchery
 void WorkerManager::sendWorkerMorphHatchery(Worker* worker){
 	TilePosition pos = getBuildLocHatchery();
-	bool temp = worker->getUnit()->build(pos, UnitTypes::Zerg_Hatchery);
-	Broodwar->sendText("%s tries to be a hatchery at %d %d, result is %d",
-		worker->getUnit()->getType().getName().c_str(),
-		pos.x(), pos.y(), temp);
+	worker->getUnit()->build(pos, UnitTypes::Zerg_Hatchery);
 	if(worker->getUnit()->isMorphing()){
 		workers.erase(worker->getUnit()->getID()); //Remove this worker from the queue so we don't mess with him
 	}
