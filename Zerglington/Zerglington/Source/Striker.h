@@ -19,7 +19,7 @@ public:
 	BWAPI::Unit* findNearestUnit(BWAPI::Unit*, std::set<BWAPI::Unit*>);
 	void setEnemyBase(BWAPI::Position);
 	void setEnemyPlayer(void);
-	void setMuster(void);
+	//void setMuster(void);
 	void setTarget(void);
 	BWAPI::Unit* getShownTarget(BWAPI::Unit* unit);
 	void checkAllTargets(void);

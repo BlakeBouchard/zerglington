@@ -217,7 +217,8 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 		Broodwar->sendText("A %s [%x] has been morphed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 
 		//If unit was morphed to a drone:
-		if(strcmp(unit->getType().getName().c_str(), "Zerg Drone") == 0){
+		if(unit->getType().getID() == UnitTypes::Zerg_Drone)
+		{
 			workerManager.addWorker(unit); //Add it to container
 		}
 
@@ -234,7 +235,13 @@ void Zerglington::onUnitMorph(BWAPI::Unit* unit){
 				// Enemy base found, pass Zergling to Striker
 				striker.addAllZerglings();
 		}
-	}else{
+		else if (unit->getType().getID() == UnitTypes::Resource_Vespene_Geyser)
+		{
+			striker.unitKilled(unit);
+		}
+	}
+	else
+	{
 		/*if we are in a replay, then we will print out the build order
 		(just of the buildings, not the units).*/
 		if (unit->getType().isBuilding() && unit->getPlayer()->isNeutral()==false){
